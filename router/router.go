@@ -2,7 +2,6 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"material/controller"
 	v1 "material/controller/v1"
 	"net/http"
 
@@ -24,8 +23,10 @@ func InitRouter() *gin.Engine {
 	r.StaticFS("/qrcode", http.Dir(qrcode.GetQrCodeFullPath()))
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	r.POST("/auth/login", controller.Login)
-	r.POST("/auth/auto_login", controller.AutoLogin)
+
+	//注册AuthRouter
+	setAuthRouter(r)
+
 	apiv1 := r.Group("/api/v1")
 	apiv1.Use(jwt.JWT())
 	{

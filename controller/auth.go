@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"material/lib/app"
+	"material/lib/dd"
 	"material/lib/e"
 	"material/lib/setting"
 	"material/lib/utils"
@@ -41,14 +42,10 @@ func AutoLogin(c *gin.Context) {
 	headers := make(map[string]string)
 	headers["PlatformKey"] = setting.PlatformSetting.PlatformKey
 	// 注册接口
-	url := setting.PlatformSetting.ApiBaseUrl + "ucenter/login.mobile/autoReg"
+	url := setting.PlatformSetting.ApiBaseUrl + dd.DD_API_AUTOLOGIN
 
-	cb := struct {
-		e.ApiJson
-		Data struct {
-			Token string `json:"token"`
-		}
-	}{}
+	cb := e.ApiJson{}
+
 	if err := utils.HttpPostJsonHeader(url, data, headers, &cb); err != nil {
 		e.ApiErr(c, err.Error())
 		return
@@ -57,8 +54,33 @@ func AutoLogin(c *gin.Context) {
 		e.ApiErr(c, cb.Msg)
 		return
 	}
-
+	cc := cb.Data.(map[string]interface{})["token"].(string)
+	log.Println(cc)
 	e.ApiOk(c, cb.Msg, cb.Data)
+}
+
+//获取注册手机验证码
+func GetAutoLoginSMSCode(c *gin.Context) {
+	data := struct {
+		Mobile string `json:"mobile"`
+	}{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	//处理请求
+	headers := make(map[string]string)
+	headers["PlatformKey"] = setting.PlatformSetting.PlatformKey
+	// 注册接口
+	url := setting.PlatformSetting.ApiBaseUrl + dd.DD_API_AUTOLOGIN_GETSMS
+
+	cb := e.ApiJson{}
+	if err := utils.HttpPostJsonHeader(url, data, headers, &cb); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+	e.ApiOpt(c, cb.Code, cb.Msg, cb.Data)
 }
 
 func Login(c *gin.Context) {
