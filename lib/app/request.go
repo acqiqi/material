@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/astaxie/beego/validation"
+	"log"
 	"material/lib/logging"
 )
 
@@ -12,4 +13,13 @@ func MarkErrors(errors []*validation.Error) {
 	}
 
 	return
+}
+
+func ErrorsGetOne(errors []*validation.Error) error {
+	for _, err := range errors {
+		log.Println(err.Key)
+		logging.Info(err.Key, err.Message)
+		return err
+	}
+	return nil
 }

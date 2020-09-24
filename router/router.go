@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	v1 "material/controller/v1"
+	"material/middleware/company"
 	"net/http"
 
 	"github.com/swaggo/gin-swagger"
@@ -26,13 +27,18 @@ func InitRouter() *gin.Engine {
 
 	//注册AuthRouter
 	setAuthRouter(r)
-
+	// 接口主节点
 	apiv1 := r.Group("/api/v1")
 	apiv1.Use(jwt.JWT())
 	{
-		//获取项目列表
-		apiv1.POST("/project_list", v1.ProjectList)
+		setV1Router(apiv1)
 
+		//需要企业授权的
+		apiv2 := apiv1.Group("/company")
+		apiv2.Use(company.Company())
+		{
+			apiv2.POST("/project_list", v1.ProjectList) //获取项目列表
+		}
 	}
 
 	return r

@@ -11,6 +11,13 @@ func GetEmptyStruct() interface{} {
 	}{}
 }
 
+type ApiPageLists struct {
+	Page  int         `json:"page"`
+	Limit int         `json:"limit"`
+	Total int         `json:"total"`
+	Lists interface{} `json:"lists"`
+}
+
 type ApiJson struct {
 	Code int         `json:"code"`
 	Msg  string      `json:"msg"`

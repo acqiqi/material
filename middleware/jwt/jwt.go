@@ -30,8 +30,9 @@ func JWT() gin.HandlerFunc {
 				}
 			}
 			log.Print(claims.Id)
-			user, err := models.GetAdminUsers(claims.Id)
+			user, err := models.GetUsersInfoCuid(claims.Id)
 			if err != nil {
+				log.Println(err)
 				e.ApiOpt(c, e.ERROR_AUTH, e.GetMsg(e.ERROR_AUTH), e.GetEmptyStruct())
 				return
 			}

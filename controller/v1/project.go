@@ -9,7 +9,7 @@ import (
 
 func ProjectList(c *gin.Context) {
 	user_info, _ := c.Get("user_info")
-	log.Print(user_info.(models.AdminUsers))
+	log.Print(user_info.(models.Users))
 	e.ApiOk(c, "登录成功", struct {
 		Token string `json:"token"`
 	}{Token: "token"})

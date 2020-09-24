@@ -7,6 +7,7 @@ import (
 	"material/lib/gredis"
 	"material/lib/logging"
 	"material/lib/setting"
+	"material/lib/utils"
 	"material/models"
 	"material/router"
 	"net/http"
@@ -20,7 +21,8 @@ func init() {
 	logging.Setup() //日志
 	gredis.Setup()  // redis
 	//utils.InitModel()
-
+	list, _ := models.CompanyUsersGetMyList(2)
+	log.Println(utils.JsonEncode(list))
 }
 
 func main() {
