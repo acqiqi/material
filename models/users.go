@@ -48,6 +48,7 @@ func GetMUserKey() string {
 }
 
 func AddUsers(user *Users) error {
+	user.Avatar = "https://cdn.ddgongjiang.com/041194a5705e6ff65287cfc0188b019f.png"
 	user.Flag = 1
 	if err := db.Create(&user).Error; err != nil {
 		return err

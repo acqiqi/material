@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	v1 "material/controller/v1"
+	"material/middleware/app_middleware"
 	"material/middleware/company"
 	"net/http"
 
@@ -24,7 +25,7 @@ func InitRouter() *gin.Engine {
 	r.StaticFS("/qrcode", http.Dir(qrcode.GetQrCodeFullPath()))
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
+	r.Use(app_middleware.App())
 	//注册AuthRouter
 	setAuthRouter(r)
 	// 接口主节点

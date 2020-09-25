@@ -9,5 +9,5 @@ func setV1Router(r *gin.RouterGroup) {
 	r.POST("/company_create", v1.CompanyCreate)  //创建公司
 	r.POST("/company_my_info", v1.CompanyMyInfo) //我的公司详情
 	r.POST("/company_my_list", v1.CompanyMyList) //我的公司列表
-
+	r.POST("/users_get_info", v1.UsersGetInfo)   //获取个人信息 GetUserinfo
 }

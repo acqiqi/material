@@ -43,6 +43,5 @@ func main() {
 	}
 
 	log.Printf("[info] start http server listening %s", endPoint)
-
 	server.ListenAndServe()
 }
