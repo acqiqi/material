@@ -18,7 +18,7 @@ type CompanyUsers struct {
 // 获取我的企业列表
 func CompanyUsersGetMyList(cuid int64) ([]CompanyUsers, error) {
 	var company_users []CompanyUsers
-	err := db.Where("cuid = ?", cuid).Preload("Company").Find(&company_users).Error
+	err := db.Where("cuid = ? AND flag = 1", cuid).Preload("Company").Find(&company_users).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
@@ -28,7 +28,16 @@ func CompanyUsersGetMyList(cuid int64) ([]CompanyUsers, error) {
 // 获取我的企业详情
 func CompanyUsersGetInfo(id int64) (*CompanyUsers, error) {
 	var cu CompanyUsers
-	err := db.Where("company_id = ?", id).Preload("Company").First(&cu).Error
+	err := db.Where("id = ? AND flag = 1", id).Preload("Company").First(&cu).Error
+	if err != nil {
+		return &CompanyUsers{}, err
+	}
+	return &cu, nil
+}
+
+func CompanyUsersGetInfoOrCompanyId(company_id int64) (*CompanyUsers, error) {
+	var cu CompanyUsers
+	err := db.Where("company_id = ? AND flag = 1", company_id).Preload("Company").First(&cu).Error
 	if err != nil {
 		return &CompanyUsers{}, err
 	}

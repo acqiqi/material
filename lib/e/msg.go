@@ -10,6 +10,9 @@ var MsgFlags = map[int]string{
 	ERROR_AUTH_CHECK_TOKEN_TIMEOUT: "Token已超时",
 	ERROR_AUTH_TOKEN:               "Token生成失败",
 	ERROR_AUTH:                     "Token错误",
+
+	ERROR_COMPANY_HEADER: "公司参数有误",
+	ERROR_COMPANY_NOT:    "公司数据有误",
 }
 
 // GetMsg get error information based on Code

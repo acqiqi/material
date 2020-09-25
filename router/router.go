@@ -33,12 +33,13 @@ func InitRouter() *gin.Engine {
 	apiv1.Use(jwt.JWT())
 	{
 		setV1Router(apiv1)
-
 		//需要企业授权的
 		apiv2 := apiv1.Group("/company")
 		apiv2.Use(company.Company())
 		{
-			apiv2.POST("/project_list", v1.ProjectList) //获取项目列表
+			apiv2.POST("/project_list", v1.ProjectList)      //获取项目列表
+			apiv2.POST("/project_create", v1.ProjecttCreate) //创建项
+			apiv2.POST("/project_edit", v1.ProjectEdit)      //编辑项目
 		}
 	}
 

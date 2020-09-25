@@ -2,6 +2,7 @@ package e
 
 import (
 	"github.com/gin-gonic/gin"
+	"material/lib/utils"
 	"net/http"
 )
 
@@ -12,10 +13,22 @@ func GetEmptyStruct() interface{} {
 }
 
 type ApiPageLists struct {
-	Page  int         `json:"page"`
-	Limit int         `json:"limit"`
-	Total int         `json:"total"`
-	Lists interface{} `json:"lists"`
+	Page    int                    `json:"page"`
+	Limit   int                    `json:"limit"`
+	Total   int                    `json:"total"`
+	Lists   interface{}            `json:"lists"`
+	Map     []utils.WhereData      `json:"map"`
+	OptParm map[string]interface{} `json:"opt_parm"`
+}
+
+//检测默认值
+func CheckApiPageListDefault(cb *ApiPageLists) {
+	if cb.Page <= 0 {
+		cb.Page = 1
+	}
+	if cb.Limit <= 0 {
+		cb.Limit = 20
+	}
 }
 
 type ApiJson struct {
