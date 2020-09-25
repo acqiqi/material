@@ -95,44 +95,52 @@ func Add(data *ProjectAdd) (*models.Project, error) {
 	return &model, nil
 }
 
-// 编辑项目
-func Edit(data *ProjectAdd) (*models.Project, error) {
-	// 表单验证
-	log.Println(utils.JsonEncode(data))
-	valid := validation.Validation{}
-	valid.Required(data.ProjectName, "ProjectName").Message("请输入项目名称")
-	valid.Required(data.ContractMoney, "ContractMoney").Message("请输入正确合同金额")
-	if valid.HasErrors() {
-		app.MarkErrors(valid.Errors)
-		log.Println(valid.Errors)
-		return nil, app.ErrorsGetOne(valid.Errors)
-	}
-
-	log.Println("???")
-	model := models.Project{}
-	model.Id = data.Id
-	model.ProjectName = data.ProjectName
-	model.State = utils.CheckStatusIndex(state, data.State)
-	model.Remark = data.Remark
-	model.AppendAttachment = data.AppendAttachment
-	model.ReceiverMembers = data.ReceiverMembers
-	model.BindState = utils.CheckStatusIndex(bindState, data.BindState)
-	model.BindType = utils.CheckStatusIndex(bindType, data.BindType)
-	model.DataOrigin = data.DataOrigin
-	model.ProjectAccount = data.ProjectAccount
-	model.SupplierAccountid = data.SupplierAccountid
-	model.ProjectAccountid = data.ProjectAccountid
-	model.ContractMoney = data.ContractMoney
-
-	if err := models.ProjectEdit(model.Id, model); err != nil {
-		return nil, err
-	}
-
-	return &model, nil
-}
+//
+//// 编辑项目
+//func Edit(data *ProjectAdd) (*models.Product, error) {
+//	// 表单验证
+//	log.Println(utils.JsonEncode(data))
+//	valid := validation.Validation{}
+//	valid.Required(data.ProjectName, "ProjectName").Message("请输入项目名称")
+//	valid.Required(data.ContractMoney, "ContractMoney").Message("请输入正确合同金额")
+//	if valid.HasErrors() {
+//		app.MarkErrors(valid.Errors)
+//		log.Println(valid.Errors)
+//		return nil, app.ErrorsGetOne(valid.Errors)
+//	}
+//
+//	log.Println("???")
+//	model, err := models.ProductGetInfo(data.Id)
+//	if err != nil {
+//		return nil, err
+//	}
+//	model.Id = data.Id
+//	model.ProjectName = data.ProjectName
+//	model.State = utils.CheckStatusIndex(state, data.State)
+//	model.Remark = data.Remark
+//	model.AppendAttachment = data.AppendAttachment
+//	model.ReceiverMembers = data.ReceiverMembers
+//	model.BindState = utils.CheckStatusIndex(bindState, data.BindState)
+//	model.BindType = utils.CheckStatusIndex(bindType, data.BindType)
+//	model.DataOrigin = data.DataOrigin
+//	model.ProjectAccount = data.ProjectAccount
+//	model.SupplierAccountid = data.SupplierAccountid
+//	model.ProjectAccountid = data.ProjectAccountid
+//	model.ContractMoney = data.ContractMoney
+//
+//	if err := models.ProjectEdit(model.Id, model); err != nil {
+//		return nil, err
+//	}
+//
+//	return &model, nil
+//}
 
 // 获取Api列表
 func ApiLists(page int, limit int, maps string) ([]*models.Project, error) {
 	offset := (page - 1) * limit
 	return models.ProjectGetLists(offset, limit, maps)
+}
+
+func SelectLists(cuid int) ([]*models.ProjectSelectData, error) {
+	return models.ProjectGetSelect("cuid = " + cuid)
 }

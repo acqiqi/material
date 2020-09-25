@@ -85,12 +85,12 @@ func ProjectEdit(c *gin.Context) {
 		e.ApiErr(c, "非法请求")
 		return
 	}
-
-	cb, err := project_service.Edit(&data)
-	if err != nil {
-		e.ApiErr(c, err.Error())
-		return
-	}
-	p, _ := models.ProjectGetInfo(cb.Id)
-	e.ApiOk(c, "编辑成功", p)
+	//
+	//cb, err := project_service.Edit(&data)
+	//if err != nil {
+	//	e.ApiErr(c, err.Error())
+	//	return
+	//}
+	//p, _ := models.ProjectGetInfo(cb.Id)
+	//e.ApiOk(c, "编辑成功", p)
 }

@@ -39,7 +39,21 @@ func ProjectGetInfo(id int64) (*Project, error) {
 // 获取项目列表
 func ProjectGetLists(pageNum int, pageSize int, maps interface{}) ([]*Project, error) {
 	var projects []*Project
-	err := db.Preload("Company").Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Find(&projects).Error
+	err := db.Model(&Project{}).Preload("Company").Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Find(&projects).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	return projects, nil
+}
+
+type ProjectSelectData struct {
+	Id          int64  `json:"id"`
+	ProjectName string `json:"name"`
+}
+
+func ProjectGetSelect(maps string) ([]*ProjectSelectData, error) {
+	var projects []*ProjectSelectData
+	err := db.Model(&Project{}).Where(maps).Order("id desc").Find(&projects).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
