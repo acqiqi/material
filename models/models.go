@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"log"
+	"material/lib/utils"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -13,10 +14,10 @@ import (
 var db *gorm.DB
 
 type Model struct {
-	Id        int64     `gorm:"primary_key" json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Flag      int       `json:"flag"` // 删除标识
+	Id        int64      `gorm:"primary_key" json:"id"`
+	CreatedAt utils.Time `json:"created_at"`
+	UpdatedAt utils.Time `json:"updated_at"`
+	Flag      int        `json:"flag"` // 删除标识
 }
 
 // Setup initializes the database instance

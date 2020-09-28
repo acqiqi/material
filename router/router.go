@@ -2,9 +2,11 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	platform_v1 "material/controller/platform/v1"
 	v1 "material/controller/v1"
 	"material/middleware/app_middleware"
 	"material/middleware/company"
+	"material/middleware/platform"
 	"net/http"
 
 	"github.com/swaggo/gin-swagger"
@@ -37,10 +39,30 @@ func InitRouter() *gin.Engine {
 		apiv2 := apiv1.Group("/company")
 		apiv2.Use(company.Company())
 		{
-			apiv2.POST("/project_list", v1.ProjectList)      //获取项目列表
-			apiv2.POST("/project_create", v1.ProjecttCreate) //创建项
-			apiv2.POST("/project_edit", v1.ProjectEdit)      //编辑项目
+			// 项目
+			apiv2.POST("/project_list", v1.ProjectList)       //获取项目列表
+			apiv2.POST("/project_create", v1.ProjectCreate)   //创建项
+			apiv2.POST("/project_edit", v1.ProjectEdit)       //编辑项目
+			apiv2.POST("/project_select", v1.ProjectSelect)   //获取Select
+			apiv2.POST("/project_receive", v1.ProjectReceive) //接收项目
+
+			// 合同
+			apiv2.POST("/contract_create", v1.ContractCreate) //创建合同
+			apiv2.POST("/contract_edit", v1.ContractEdit)     //编辑合同
+			apiv2.POST("/contract_list", v1.ContractList)     //合同列表
+
 		}
+	}
+	api_platformv1 := r.Group("/platform_api/v1")
+	api_platformv1.Use(platform.Platform())
+	{
+		api_platformv1.POST("/company_get_info", platform_v1.CompanyGetInfo)   //获取企业详情
+		api_platformv1.POST("/company_bind_link", platform_v1.CompanyBindLink) //绑定企业
+		api_platformv1.POST("/company_list", platform_v1.CompanyList)          //绑定企业
+		api_platformv1.POST("/company_delete", platform_v1.CompanyDelete)      //绑定企业
+		// 项目
+		api_platformv1.POST("/project_sync", platform_v1.ProjectSync) //同步项目
+
 	}
 
 	return r

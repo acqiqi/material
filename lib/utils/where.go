@@ -14,11 +14,14 @@ type WhereData struct {
 }
 
 func WhereToMap(where_data []WhereData) map[string]interface{} {
-	cb := make(map[string]interface{})
-	for _, v := range where_data {
-		cb[v.Key+"__"+v.Op] = v.Value
+	if where_data != nil {
+		cb := make(map[string]interface{})
+		for _, v := range where_data {
+			cb[v.Key+"__"+v.Op] = v.Value
+		}
+		return cb
 	}
-	return cb
+	return make(map[string]interface{})
 }
 
 func BuildWhere(maps map[string]interface{}) string {

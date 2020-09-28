@@ -117,3 +117,34 @@ func LikeDeletes(key string) error {
 
 	return nil
 }
+
+// 获取缓存缓存
+func GetCacheString(key string) string {
+	b, err := Get(key)
+	if err != nil {
+		return ""
+	}
+	log.Println(b)
+	return string(b)
+}
+
+// 设置缓存
+func SetCacheString(key string, data string, time int) (err error) {
+	conn := RedisConn.Get()
+	defer conn.Close()
+
+	value := data
+
+	_, err = conn.Do("SET", key, value)
+	if err != nil {
+		return err
+	}
+
+	_, err = conn.Do("EXPIRE", key, time)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}

@@ -36,7 +36,6 @@ type Product struct {
 	CompanyId           int64   `json:"company_id"`
 	Company             Company `gorm:"ForeignKey:CompanyId" json:"company"`
 	SupplyCycle         int     `json:"supply_cycle"` // 供货周期
-	DeletedAt           string  `json:"deleted_at"`
 }
 
 // 新增产品
@@ -59,7 +58,7 @@ func ProductEdit(id int64, data interface{}) error {
 // 获取产品详情
 func ProductGetInfo(id int64) (*Product, error) {
 	var project Product
-	err := db.Where("id = ?", id).Preload("Company").First(&project).Error
+	err := db.Where("id = ? AND flag =1", id).Preload("Company").First(&project).Error
 	if err != nil {
 		return &Product{}, err
 	}

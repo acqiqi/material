@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -144,4 +145,14 @@ func HttpGetDownload(url string, filepath string) {
 		fmt.Println(err)
 	}
 	_ = ioutil.WriteFile(filepath, body, 0755)
+}
+
+func HttpGetIO(url string) (io.Reader, error) {
+	resp, err := http.Get(url)
+	//defer resp.Body.Close()
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return resp.Body, nil
 }

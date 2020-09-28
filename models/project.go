@@ -2,6 +2,8 @@ package models
 
 import (
 	"github.com/jinzhu/gorm"
+	"log"
+	"material/lib/utils"
 )
 
 // 项目
@@ -24,16 +26,35 @@ type Project struct {
 	ContractMoney     float64 `json:"contract_money"`     // 合同总金额
 	ReceivedMoney     float64 `json:"received_money"`     // 已回款总金额
 	ReceiptMoney      float64 `json:"receipt_money"`      // 已开票总金额
-	DeletedAt         string  `json:"deleted_at"`
+	Status            int     `json:"status"`             //状态 1已接收 如果是自建的会自动设置1
+	PlatformKey       string  `json:"platform_key"`       // 平台key
+	PlatformUid       string  `json:"platform_uid"`       // 平台用户id
+	PlatformId        string  `json:"platform_id"`        // 平台用户id
+	IsPlatform        int     `json:"is_platform"`        // 是否三方平台同步
+
+	ReceiveTime utils.Time `json:"receive_time"` //接收时间
+
 }
 
 func ProjectGetInfo(id int64) (*Project, error) {
 	var project Project
-	err := db.Where("id = ?", id).Preload("Company").First(&project).Error
+	err := db.Where("id = ? AND flag =1", id).Preload("Company").First(&project).Error
 	if err != nil {
 		return &Project{}, err
 	}
 	return &project, nil
+}
+
+// 三方检测是否存在
+func ProjectCheck(platform_id string, platform_key string, platform_uid string) (*Project, error) {
+	log.Println(platform_id, platform_key, platform_uid)
+	var pc Project
+	err := db.Where("platform_id = ? AND platform_key = ? AND platform_uid = ? AND flag =1",
+		platform_id, platform_key, platform_uid).Preload("Company").First(&pc).Error
+	if err != nil {
+		return &Project{}, err
+	}
+	return &pc, nil
 }
 
 // 获取项目列表
@@ -46,14 +67,9 @@ func ProjectGetLists(pageNum int, pageSize int, maps interface{}) ([]*Project, e
 	return projects, nil
 }
 
-type ProjectSelectData struct {
-	Id          int64  `json:"id"`
-	ProjectName string `json:"name"`
-}
-
-func ProjectGetSelect(maps string) ([]*ProjectSelectData, error) {
-	var projects []*ProjectSelectData
-	err := db.Model(&Project{}).Where(maps).Order("id desc").Find(&projects).Error
+func ProjectGetSelect(maps string) ([]*Project, error) {
+	var projects []*Project
+	err := db.Where(maps).Order("id desc").Find(&projects).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}

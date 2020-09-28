@@ -21,7 +21,6 @@ func Company() gin.HandlerFunc {
 			e.ApiOpt(c, e.ERROR_COMPANY_NOT, e.GetMsg(e.ERROR_COMPANY_NOT), e.GetEmptyStruct())
 			return
 		}
-
 		c.Set("company", *user_company)
 		c.Next()
 	}

@@ -15,7 +15,7 @@ func GetEmptyStruct() interface{} {
 type ApiPageLists struct {
 	Page    int                    `json:"page"`
 	Limit   int                    `json:"limit"`
-	Total   int                    `json:"total"`
+	Total   int                    `json:"total_size"`
 	Lists   interface{}            `json:"lists"`
 	Map     []utils.WhereData      `json:"map"`
 	OptParm map[string]interface{} `json:"opt_parm"`
@@ -68,4 +68,12 @@ func ApiOpt(c *gin.Context, code int, msg string, data interface{}) {
 	})
 	c.Abort()
 	return
+}
+
+// 用于Callback 请求数据集合
+type HttpCallbackData struct {
+	Code   int         `json:"code"`   // 状态码 默认0成功 1失败 其他专用错误码
+	Msg    string      `json:"msg"`    // 主体消息
+	Action string      `json:"action"` // 行为 利用行为二次解析Data结构体
+	Data   interface{} `json:"data"`   // 主体数据根据Action反序列
 }

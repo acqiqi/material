@@ -1,6 +1,10 @@
 package models
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/jinzhu/gorm"
+	"material/lib/utils"
+	"strconv"
+)
 
 type Company struct {
 	Model
@@ -14,12 +18,22 @@ type Company struct {
 	VipLevel   int    `json:"vip_level"`    // 企业购买等级
 	VipEndTime int    `json:"vip_end_time"` // 到期时间
 	Status     int    `json:"status"`       // 状态 0 停业  1营业 -1停用
-	DeletedAt  string `json:"deleted_at"`
+	CompanyKey string `json:"company_key"`  //企业Key
+
 }
 
 func CompanyGetInfo(id int64) (*Company, error) {
 	var user Company
-	err := db.Where("id = ?", id).First(&user).Error
+	err := db.Where("id = ? AND flag =1", id).First(&user).Error
+	if err != nil {
+		return &Company{}, err
+	}
+	return &user, nil
+}
+
+func CompanyGetInfoOrKey(key string) (*Company, error) {
+	var user Company
+	err := db.Where("company_key = ? AND flag =1", key).First(&user).Error
 	if err != nil {
 		return &Company{}, err
 	}
@@ -29,7 +43,7 @@ func CompanyGetInfo(id int64) (*Company, error) {
 //获取我的主企业
 func CompanyGetUserList(cuid int64) ([]Company, error) {
 	var companys []Company
-	err := db.Where("cuid = ?", cuid).Find(&companys).Error
+	err := db.Where("cuid = ? AND flag =1", cuid).Find(&companys).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
@@ -43,4 +57,15 @@ func CompanyAdd(company *Company) error {
 		return err
 	}
 	return nil
+}
+
+// 获取企业Key
+func CompanyGetKey() string {
+	k := utils.RandInt64(10000000, 99999999)
+	var company Company
+	err := db.Where("company_key = ? AND flag =1", k).First(&company).Error
+	if err != nil {
+		return strconv.FormatInt(k, 10)
+	}
+	return GetMUserKey()
 }

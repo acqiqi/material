@@ -7,6 +7,7 @@ import (
 	"material/lib/app"
 	"material/lib/utils"
 	"material/models"
+	"strconv"
 )
 
 type ProjectAdd struct {
@@ -27,6 +28,12 @@ type ProjectAdd struct {
 	ContractMoney     float64 `json:"contract_money"`     // 合同总金额
 	ReceivedMoney     float64 `json:"received_money"`     // 已回款总金额
 	ReceiptMoney      float64 `json:"receipt_money"`      // 已开票总金额
+	Status            int     `json:"status"`             //状态 1已接收 如果是自建的会自动设置1
+	PlatformKey       string  `json:"platform_key"`       // 平台key
+	PlatformUid       string  `json:"platform_uid"`       // 平台用户id
+	PlatformId        string  `json:"platform_id"`        // 平台用户id
+	IsPlatform        int     `json:"is_platform"`        // 是否三方平台同步
+
 }
 
 var state = map[int]string{
@@ -47,31 +54,36 @@ var bindType = map[int]string{
 	3: "私有化定制",
 }
 
-//新增企业
+//新增项目
 func Add(data *ProjectAdd) (*models.Project, error) {
 	// 表单验证
 	log.Println(utils.JsonEncode(data))
 	valid := validation.Validation{}
 	valid.Required(data.Cuid, "Cuid").Message("CUID不能为空！")
 	valid.Required(data.ProjectName, "ProjectName").Message("请输入项目名称")
-	valid.Required(data.ContractMoney, "ContractMoney").Message("请输入正确合同金额")
+	if data.PlatformKey != "" {
+		valid.Required(data.PlatformId, "PlatformId").Message("请输入项目唯一id")
+	} else {
+		valid.Required(data.ContractMoney, "ContractMoney").Message("请输入正确合同金额")
+	}
 	if valid.HasErrors() {
 		app.MarkErrors(valid.Errors)
 		log.Println(valid.Errors)
 		return nil, app.ErrorsGetOne(valid.Errors)
 	}
 
-	//检测Company是否存在
 	company, err := models.CompanyUsersGetInfoOrCompanyId(data.CompanyId)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("请选择正确的企业")
 	}
-	// 检测有用户权限
-	if company.Cuid != data.Cuid {
-		return nil, errors.New("非法请求")
+	//检测Company是否存在
+	if data.PlatformKey == "" {
+		// 检测有用户权限
+		if company.Cuid != data.Cuid {
+			return nil, errors.New("非法请求")
+		}
 	}
 
-	log.Println("???")
 	model := models.Project{}
 	model.Cuid = data.Cuid
 	model.ProjectName = data.ProjectName
@@ -89,51 +101,56 @@ func Add(data *ProjectAdd) (*models.Project, error) {
 	model.ContractMoney = data.ContractMoney
 	model.ReceivedMoney = 0
 	model.ReceiptMoney = 0
+	model.PlatformId = data.PlatformId
+	model.PlatformKey = data.PlatformKey
+	model.PlatformUid = data.PlatformUid
+	model.IsPlatform = data.IsPlatform
 	if err := models.ProjectAdd(&model); err != nil {
 		return nil, err
 	}
 	return &model, nil
 }
 
-//
-//// 编辑项目
-//func Edit(data *ProjectAdd) (*models.Product, error) {
-//	// 表单验证
-//	log.Println(utils.JsonEncode(data))
-//	valid := validation.Validation{}
-//	valid.Required(data.ProjectName, "ProjectName").Message("请输入项目名称")
-//	valid.Required(data.ContractMoney, "ContractMoney").Message("请输入正确合同金额")
-//	if valid.HasErrors() {
-//		app.MarkErrors(valid.Errors)
-//		log.Println(valid.Errors)
-//		return nil, app.ErrorsGetOne(valid.Errors)
-//	}
-//
-//	log.Println("???")
-//	model, err := models.ProductGetInfo(data.Id)
-//	if err != nil {
-//		return nil, err
-//	}
-//	model.Id = data.Id
-//	model.ProjectName = data.ProjectName
-//	model.State = utils.CheckStatusIndex(state, data.State)
-//	model.Remark = data.Remark
-//	model.AppendAttachment = data.AppendAttachment
-//	model.ReceiverMembers = data.ReceiverMembers
-//	model.BindState = utils.CheckStatusIndex(bindState, data.BindState)
-//	model.BindType = utils.CheckStatusIndex(bindType, data.BindType)
-//	model.DataOrigin = data.DataOrigin
-//	model.ProjectAccount = data.ProjectAccount
-//	model.SupplierAccountid = data.SupplierAccountid
-//	model.ProjectAccountid = data.ProjectAccountid
-//	model.ContractMoney = data.ContractMoney
-//
-//	if err := models.ProjectEdit(model.Id, model); err != nil {
-//		return nil, err
-//	}
-//
-//	return &model, nil
-//}
+// 编辑项目
+func Edit(data *ProjectAdd) (*models.Project, error) {
+	// 表单验证
+	log.Println(utils.JsonEncode(data))
+	valid := validation.Validation{}
+	valid.Required(data.ProjectName, "ProjectName").Message("请输入项目名称")
+	valid.Required(data.ContractMoney, "ContractMoney").Message("请输入正确合同金额")
+	if valid.HasErrors() {
+		app.MarkErrors(valid.Errors)
+		log.Println(valid.Errors)
+		return nil, app.ErrorsGetOne(valid.Errors)
+	}
+
+	log.Println("???")
+	model, err := models.ProjectGetInfo(data.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	model.Id = data.Id
+	model.ProjectName = data.ProjectName
+	model.State = utils.CheckStatusIndex(state, data.State)
+	model.Remark = data.Remark
+	model.AppendAttachment = data.AppendAttachment
+	model.ReceiverMembers = data.ReceiverMembers
+	model.BindState = utils.CheckStatusIndex(bindState, data.BindState)
+	model.BindType = utils.CheckStatusIndex(bindType, data.BindType)
+	model.DataOrigin = data.DataOrigin
+	model.ProjectAccount = data.ProjectAccount
+	model.SupplierAccountid = data.SupplierAccountid
+	model.ProjectAccountid = data.ProjectAccountid
+	model.ContractMoney = data.ContractMoney
+
+	log.Println(model)
+	if err := models.ProjectEdit(model.Id, model); err != nil {
+		return nil, err
+	}
+
+	return model, nil
+}
 
 // 获取Api列表
 func ApiLists(page int, limit int, maps string) ([]*models.Project, error) {
@@ -141,6 +158,23 @@ func ApiLists(page int, limit int, maps string) ([]*models.Project, error) {
 	return models.ProjectGetLists(offset, limit, maps)
 }
 
-func SelectLists(cuid int) ([]*models.ProjectSelectData, error) {
-	return models.ProjectGetSelect("cuid = " + cuid)
+type ProjectSelectData struct {
+	Id          int64  `json:"id"`
+	ProjectName string `json:"name"`
+}
+
+// 获取Select
+func SelectLists(company_id int64) ([]ProjectSelectData, error) {
+	lists, err := models.ProjectGetSelect("flag =1 AND company_id = " + strconv.Itoa(int(company_id)))
+	if err != nil {
+		return nil, err
+	}
+	cb := make([]ProjectSelectData, len(lists))
+	for i := 0; i < len(lists); i++ {
+		cb[i] = ProjectSelectData{
+			Id:          lists[i].Id,
+			ProjectName: lists[i].ProjectName,
+		}
+	}
+	return cb, nil
 }

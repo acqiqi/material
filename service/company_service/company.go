@@ -21,6 +21,7 @@ type CompanyAdd struct {
 	VipEndTime int      `json:"vip_end_time"` // 到期时间
 	Status     int      `json:"status"`       // 状态 0 停业  1营业 -1停用
 	DeletedAt  string   `json:"deleted_at"`
+	CompanyKey string   `json:"company_key"` //企业Key
 }
 
 //新增企业
@@ -48,6 +49,7 @@ func Add(data *CompanyAdd) (*models.Company, error) {
 	model.VipLevel = 0
 	model.VipEndTime = 0
 	model.Status = 1
+	model.CompanyKey = models.CompanyGetKey()
 	if err := models.CompanyAdd(&model); err != nil {
 		return nil, err
 	}
