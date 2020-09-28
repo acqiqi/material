@@ -22,6 +22,7 @@ type CompanyAdd struct {
 	Status     int      `json:"status"`       // 状态 0 停业  1营业 -1停用
 	DeletedAt  string   `json:"deleted_at"`
 	CompanyKey string   `json:"company_key"` //企业Key
+	BindState  int      `json:"bind_state"`  //是否绑定 0否 1是
 }
 
 //新增企业

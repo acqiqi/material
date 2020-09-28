@@ -62,7 +62,8 @@ func InitRouter() *gin.Engine {
 		api_platformv1.POST("/company_delete", platform_v1.CompanyDelete)      //绑定企业
 		// 项目
 		api_platformv1.POST("/project_sync", platform_v1.ProjectSync) //同步项目
-
+		// 合同同步
+		api_platformv1.POST("/contract_sync", platform_v1.ContractSync) //同步项目
 	}
 
 	return r

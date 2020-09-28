@@ -39,6 +39,11 @@ type Contract struct {
 	CompanyId             int64      `json:"company_id"`               // 公司id
 	Company               Company    `gorm:"ForeignKey:CompanyId" json:"company"`
 	Cuid                  int        `json:"cuid"`
+	PlatformKey           string     `json:"platform_key"` // 平台key
+	PlatformUid           string     `json:"platform_uid"` // 平台用户id
+	PlatformId            string     `json:"platform_id"`  // 平台用户id
+	IsPlatform            int        `json:"is_platform"`  // 是否三方平台同步
+	BindState             int        `json:"bind_state"`   //是否绑定 0否 1是
 }
 
 // 新增合同
@@ -48,6 +53,18 @@ func ContractAdd(contract *Contract) error {
 		return err
 	}
 	return nil
+}
+
+// 三方检测是否存在
+func ContractCheck(platform_id string, platform_key string, platform_uid string) (*Contract, error) {
+	log.Println(platform_id, platform_key, platform_uid)
+	var pc Contract
+	err := db.Where("platform_id = ? AND platform_key = ? AND platform_uid = ? AND flag =1",
+		platform_id, platform_key, platform_uid).Preload("Company").First(&pc).Error
+	if err != nil {
+		return &Contract{}, err
+	}
+	return &pc, nil
 }
 
 // 编辑合同

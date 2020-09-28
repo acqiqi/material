@@ -44,6 +44,12 @@ type ContractAdd struct {
 	Cuid                  int            `json:"cuid"`
 	CreatedAt             utils.Time     `json:"created_at"`
 	UpdatedAt             utils.Time     `json:"updated_at"`
+	PlatformKey           string         `json:"platform_key"` // 平台key
+	PlatformUid           string         `json:"platform_uid"` // 平台用户id
+	PlatformId            string         `json:"platform_id"`  // 平台用户id
+	IsPlatform            int            `json:"is_platform"`  // 是否三方平台同步
+	BindState             int            `json:"bind_state"`   //是否绑定 0否 1是
+
 }
 
 //新增合同
@@ -68,6 +74,9 @@ func Add(data *ContractAdd) (*models.Contract, error) {
 	//检测企业是否和项目是对应的
 	if project.Id != data.ProjectId {
 		return nil, errors.New("请选择正确的项目")
+	}
+	if project.CompanyId != data.CompanyId {
+		return nil, errors.New("非法请求 not company")
 	}
 
 	model := models.Contract{
@@ -102,6 +111,11 @@ func Add(data *ContractAdd) (*models.Contract, error) {
 		HasR:                  0,
 		CompanyId:             data.CompanyId,
 		Cuid:                  data.Cuid,
+		BindState:             data.BindState,
+		PlatformUid:           data.PlatformUid,
+		PlatformKey:           data.PlatformKey,
+		PlatformId:            data.PlatformId,
+		IsPlatform:            data.IsPlatform,
 	}
 
 	if err := models.ContractAdd(&model); err != nil {

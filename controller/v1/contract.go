@@ -21,6 +21,7 @@ func ContractCreate(c *gin.Context) {
 	data.Cuid = int(user_info.(models.Users).Id)
 	company, _ := c.Get("company")
 	data.CompanyId = company.(models.CompanyUsers).Company.Id
+	data.BindState = 1
 	//手动创建默认绑定
 
 	cb, err := contract_service.Add(&data)
@@ -45,6 +46,12 @@ func ContractEdit(c *gin.Context) {
 		e.ApiErr(c, "项目不存在")
 		return
 	}
+
+	if contract.IsPlatform == 1 {
+		e.ApiErr(c, "三方平台合同无法编辑")
+		return
+	}
+
 	company, _ := c.Get("company")
 	if contract.CompanyId != company.(models.CompanyUsers).Company.Id {
 		e.ApiErr(c, "非法请求")
