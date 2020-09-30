@@ -20,13 +20,6 @@ func init() {
 	logging.Setup() //日志
 	gredis.Setup()  // redis
 	//utils.InitModel()
-
-	//excel_utils := new(utils.ExcelUtils)
-	//excel_utils.SheetName = "码里产品导入模板"
-	//list,err := excel_utils.ImportUrl("https://cdn.ddgongjiang.com/FtBcJUBfaSLKOVioXf7-XfdVr1oj",[]string{
-	//	"ProjetName","ProjectDesc","Danjia","","","Changdu","Kuandu","Houdu","Guige","Anzhuang",
-	//})
-	//log.Println(utils.JsonEncode(list))
 }
 
 func main() {

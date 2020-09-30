@@ -2,7 +2,7 @@ package v1
 
 import "github.com/gin-gonic/gin"
 
-// 同步材料
-func ProductSync(c *gin.Context) {
+// 同步下料单
+func MaterialSync(c *gin.Context) {
 
 }

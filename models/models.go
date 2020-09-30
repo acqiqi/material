@@ -44,6 +44,17 @@ func Setup() {
 	db.DB().SetMaxOpenConns(100)
 }
 
+// 创建新事物
+func NewTransaction() *gorm.DB {
+	t := db.Begin()
+	return t
+}
+
+//获取Db 实例
+func GetDb() *gorm.DB {
+	return db
+}
+
 // CloseDB closes database connection (unnecessary)
 func CloseDB() {
 	defer db.Close()
