@@ -69,6 +69,15 @@ type Platform struct {
 
 var PlatformSetting = &Platform{}
 
+type Wechat struct {
+	SmallAppID string
+	AppSecret  string
+	MCHID      string
+	PayKey     string
+}
+
+var WechatSetting = &Wechat{}
+
 var cfg *ini.File
 
 // Setup initialize the configuration instance
@@ -84,6 +93,7 @@ func Setup() {
 	mapTo("database", DatabaseSetting)
 	mapTo("redis", RedisSetting)
 	mapTo("platform", PlatformSetting)
+	mapTo("wechat", WechatSetting)
 	AppSetting.ImageMaxSize = AppSetting.ImageMaxSize * 1024 * 1024
 	ServerSetting.ReadTimeout = ServerSetting.ReadTimeout * time.Second
 	ServerSetting.WriteTimeout = ServerSetting.WriteTimeout * time.Second

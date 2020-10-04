@@ -64,6 +64,9 @@ func InitRouter() *gin.Engine {
 		api_platformv1.POST("/project_sync", platform_v1.ProjectSync) //同步项目
 		// 合同同步
 		api_platformv1.POST("/contract_sync", platform_v1.ContractSync) //同步项目
+
+		// 用户部分
+		api_platformv1.POST("/users_dd_sync_qrcode", platform_v1.UsersDDSyncQrcode) //获取同步用户二维码
 	}
 
 	return r
