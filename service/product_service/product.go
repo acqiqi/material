@@ -81,7 +81,7 @@ type CBProjectSync struct {
 }
 
 //同步下料单
-func PlatformSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platform) (cb interface{}, err error) {
+func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platform) (cb interface{}, err error) {
 	// 查询是否有同步过的材料
 	_, err = models.MaterialCheck(m_data.PlatformId, m_data.PlatformKey, m_data.PlatformUid)
 	if err != nil {
@@ -220,7 +220,11 @@ func PlatformSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platfo
 		//return nil,errors.New("材料为空")
 	}
 
-	return
+	return struct {
+		MData MaterialAdd `json:"m_data"`
+	}{
+		MData: *m_data,
+	}, nil
 }
 
 //新增产品

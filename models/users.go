@@ -14,6 +14,20 @@ type Users struct {
 	Avatar   string `json:"avatar"`     //头像
 	Mobile   int    `json:"mobile"`     // 手机号
 	MUserKey string `json:"m_user_key"` // 用户Key
+
+	// 目前要处理的三方平台的存储信息
+	DUserKey string `json:"d_user_key"` //绑定三方账号信息
+
+}
+
+// 查询DD的UserKey
+func GetUsersInfoDD(d_user_key string) (*Users, error) {
+	var user Users
+	err := db.Where("d_user_key = ? AND flag =1", d_user_key).First(&user).Error
+	if err != nil {
+		return &Users{}, err
+	}
+	return &user, nil
 }
 
 // 获取用户
