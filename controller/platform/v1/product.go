@@ -13,6 +13,10 @@ func MaterialSync(c *gin.Context) {
 		MData product_service.MaterialAdd  `json:"m_data"`
 		PData []product_service.ProductAdd `json:"p_data"`
 	}{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
 
 	platform, _ := c.Get("platform")
 

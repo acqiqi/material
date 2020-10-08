@@ -45,6 +45,9 @@ type Product struct {
 	PlatformKey         string     `json:"platform_key"` //平台key
 	PlatformUid         string     `json:"platform_uid"` //平台uid
 	PlatformId          string     `json:"platform_id"`  //平台id
+
+	ContractId int64    `json:"contract_id"` //合同
+	Contract   Contract `gorm:"ForeignKey:ContractId" json:"contract"`
 }
 
 // 新增单个产品 带事物
@@ -92,4 +95,22 @@ func ProductGetInfo(id int64) (*Product, error) {
 		return &Product{}, err
 	}
 	return &project, nil
+}
+
+// 获取产品列表
+func ProductGetLists(pageNum int, pageSize int, maps interface{}) ([]*Product, error) {
+	var products []*Product
+	err := db.Model(&Product{}).Preload("Contract").Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Find(&products).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	return products, nil
+}
+
+//查询项目总数
+func ProductGetListsCount(maps interface{}) int {
+	var products []*Product
+	count := 0
+	db.Preload("Company").Where(maps).Find(&products).Count(&count)
+	return count
 }

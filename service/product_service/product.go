@@ -72,6 +72,8 @@ type ProductAdd struct {
 	PlatformKey string `json:"platform_key"` //平台key
 	PlatformUid string `json:"platform_uid"` //平台uid
 	PlatformId  string `json:"platform_id"`  //平台id
+
+	ContractId int64 `json:"contract_id"` //合同
 }
 
 // 用于Sync 接口的回调
@@ -84,12 +86,12 @@ type CBProjectSync struct {
 func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platform) (cb interface{}, err error) {
 	// 查询是否有同步过的材料
 	_, err = models.MaterialCheck(m_data.PlatformId, m_data.PlatformKey, m_data.PlatformUid)
-	if err != nil {
-		return errors.New("已经同步过，请勿重复同步"), err
+	if err == nil {
+		return nil, errors.New("已经同步过，请勿重复同步")
 	}
 
 	valid := validation.Validation{}
-	valid.Required(m_data.Name, "Name").Message("请输入材料单名称")
+	valid.Required(m_data.Name, "Name").Message("请输入下料单名称")
 	valid.Required(m_data.TotalAmount, "TotalAmount").Message("请输入下料总额")
 	valid.Required(m_data.TotalTaxAmount, "TotalTaxAmount").Message("请输入下料含税总额")
 	valid.Required(m_data.CompanyId, "CompanyId").Message("材料商id有误")
@@ -141,6 +143,7 @@ func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platfor
 		PlatformId:     m_data.PlatformId, //处理对应id
 		ProjectId:      project.Id,
 		CompanyId:      project.CompanyId,
+		ContractId:     m_data.ContractId, //合同id
 	}
 	models.MaterialAddT(&mm, t)
 
@@ -191,23 +194,24 @@ func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platfor
 				ConfigData:         "[]",
 				AppendAttachment:   data[i].AppendAttachment,
 				//ProjectMaterialId:   data[i].ProjectMaterialId,
-				//AdminMaterialInfoId: 0,
-				ProjectAdditional: data[i].ProjectName,
-				Remark:            data[i].Remark,
-				Length:            data[i].Length,
-				Width:             data[i].Width,
-				Height:            data[i].Height,
-				Location:          data[i].Location,
-				Standard:          data[i].Standard,
-				ArriveDate:        data[i].ArriveDate,
-				Cuid:              0,
-				CompanyId:         project.CompanyId,
-				Company:           models.Company{},
-				SupplyCycle:       data[i].SupplyCycle,
-				MaterialId:        m_data.Id,
-				PlatformKey:       platform.PlatformKey,
-				PlatformUid:       data[i].PlatformUid,
-				PlatformId:        data[i].PlatformId,
+				AdminMaterialInfoId: 0,
+				ProjectAdditional:   data[i].ProjectAdditional,
+				Remark:              data[i].Remark,
+				Length:              data[i].Length,
+				Width:               data[i].Width,
+				Height:              data[i].Height,
+				Location:            data[i].Location,
+				Standard:            data[i].Standard,
+				ArriveDate:          data[i].ArriveDate,
+				Cuid:                0,
+				CompanyId:           project.CompanyId,
+				Company:             models.Company{},
+				SupplyCycle:         data[i].SupplyCycle,
+				MaterialId:          mm.Id,
+				PlatformKey:         platform.PlatformKey,
+				PlatformUid:         mm.PlatformUid,
+				PlatformId:          data[i].PlatformId,
+				ContractId:          mm.ContractId,
 			}
 			err := models.ProductAddT(&product_model, t)
 			if err != nil {
@@ -219,11 +223,11 @@ func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platfor
 		// 材料没有的情况
 		//return nil,errors.New("材料为空")
 	}
-
+	t.Commit()
 	return struct {
-		MData MaterialAdd `json:"m_data"`
+		MData models.Material `json:"m_data"`
 	}{
-		MData: *m_data,
+		MData: mm,
 	}, nil
 }
 
@@ -337,7 +341,7 @@ func Edit(data *ProductAdd) (*models.Product, error) {
 }
 
 // 获取Api列表
-func ApiLists(page int, limit int, maps string) ([]*models.Project, error) {
+func ApiLists(page int, limit int, maps string) ([]*models.Product, error) {
 	offset := (page - 1) * limit
-	return models.ProjectGetLists(offset, limit, maps)
+	return models.ProductGetLists(offset, limit, maps)
 }
