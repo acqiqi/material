@@ -6,6 +6,7 @@ import (
 	"material/lib/utils"
 	"material/models"
 	"material/service/company_service"
+	"material/service/depository_service"
 )
 
 // 创建公司
@@ -23,6 +24,16 @@ func CompanyCreate(c *gin.Context) {
 		e.ApiErr(c, err.Error())
 		return
 	}
+	//创建默认仓库
+	d := depository_service.DepositoryAdd{
+		Name:      "默认仓库",
+		Desc:      "",
+		Address:   "",
+		CompanyId: cb.Id,
+		Status:    1,
+	}
+	depository_service.Add(&d)
+
 	e.ApiOk(c, "创建成功", cb)
 }
 

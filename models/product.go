@@ -114,3 +114,13 @@ func ProductGetListsCount(maps interface{}) int {
 	db.Preload("Company").Where(maps).Find(&products).Count(&count)
 	return count
 }
+
+// 获取材料select
+func ProductGetSelect(maps string) ([]*Product, error) {
+	var product []*Product
+	err := db.Where(maps).Order("id asc").Find(&product).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	return product, nil
+}

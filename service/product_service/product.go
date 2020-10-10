@@ -345,3 +345,8 @@ func ApiLists(page int, limit int, maps string) ([]*models.Product, error) {
 	offset := (page - 1) * limit
 	return models.ProductGetLists(offset, limit, maps)
 }
+
+// 获取Select列表
+func Select(maps string) ([]*models.Product, error) {
+	return models.ProductGetSelect(maps)
+}

@@ -7,6 +7,20 @@ import (
 	"material/service/product_service"
 )
 
+// 获取大分类列表
+func ProductCatsList(c *gin.Context) {
+	list, err := product_service.CatsSelect()
+	if err != nil {
+		e.ApiErr(c, "请求失败 "+err.Error())
+		return
+	}
+	e.ApiOk(c, "获取成功", struct {
+		Lists interface{} `json:"list"`
+	}{
+		Lists: list,
+	})
+}
+
 // 同步下料单
 func MaterialSync(c *gin.Context) {
 	data := struct {

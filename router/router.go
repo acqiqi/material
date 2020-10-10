@@ -52,7 +52,18 @@ func InitRouter() *gin.Engine {
 			apiv2.POST("/contract_list", v1.ContractList)     //合同列表
 
 			//产品 材料
+			apiv2.POST("/product_class_list", v1.ProductClassList)     //材料类型列表
+			apiv2.POST("/product_class_create", v1.ProductClassCreate) //新增材料类型
+			apiv2.POST("/product_class_edit", v1.ProductClassEdit)     //编辑材料类型
+			apiv2.POST("/product_class_delete", v1.ProductClassDelete) //删除材料类型
+
 			apiv2.POST("/product_list", v1.ProductList) //材料列表
+
+			//仓库
+			apiv2.POST("/depository_create", v1.DepositoryCreate) //创建昂库
+			apiv2.POST("/depository_edit", v1.DepositoryEdit)     //编辑仓库
+			apiv2.POST("/depository_list", v1.DepositoryList)
+
 		}
 	}
 	api_platformv1 := r.Group("/platform_api/v1")
@@ -67,7 +78,8 @@ func InitRouter() *gin.Engine {
 		// 合同同步
 		api_platformv1.POST("/contract_sync", platform_v1.ContractSync) //同步项目
 		// 下料单
-		api_platformv1.POST("/material_sync", platform_v1.MaterialSync) //同步下料单
+		api_platformv1.POST("/product_cats_list", platform_v1.ProductCatsList) //获取材料大类
+		api_platformv1.POST("/material_sync", platform_v1.MaterialSync)        //同步下料单
 
 		// 用户部分
 		api_platformv1.POST("/users_dd_sync_qrcode", platform_v1.UsersDDSyncQrcode) //获取同步用户二维码
