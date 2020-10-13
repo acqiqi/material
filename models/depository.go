@@ -35,7 +35,7 @@ func DepositoryGetLists(pageNum int, pageSize int, maps interface{}) ([]*Deposit
 
 // 查询仓库列表数量
 func DepositoryGetListsCount(maps interface{}) int {
-	var d []*Product
+	var d []*Depository
 	count := 0
 	db.Preload("Company").Where(maps).Find(&d).Count(&count)
 	return count
@@ -56,4 +56,13 @@ func DepositoryEdit(id int64, data interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func DepositoryGetSelect(maps string) ([]*Depository, error) {
+	var d []*Depository
+	err := db.Where(maps).Order("id desc").Find(&d).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	return d, nil
 }

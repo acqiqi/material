@@ -187,3 +187,27 @@ func ProductClassDelete(c *gin.Context) {
 	models.ProductClassEdit(data.Id, info)
 	e.ApiOk(c, "操作成功", e.GetEmptyStruct())
 }
+
+// 材料表格
+func ProductTable(c *gin.Context) {
+	data := struct {
+		Id int64 `json:"id"`
+	}{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	company, _ := c.Get("company")
+	list, err := product_service.Tables(data.Id, company.(models.CompanyUsers).Company.Id)
+	if err != nil {
+		e.ApiErr(c, "非法请求")
+		return
+	}
+
+	e.ApiOk(c, "获取成功", struct {
+		Table interface{} `json:"table"`
+	}{
+		Table: list,
+	})
+}

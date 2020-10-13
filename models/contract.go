@@ -95,3 +95,12 @@ func ContractGetLists(pageNum int, pageSize int, maps interface{}) ([]*Contract,
 	log.Println(utils.JsonEncode(projects))
 	return projects, nil
 }
+
+func ContractGetSelect(maps string) ([]*Contract, error) {
+	var contract []*Contract
+	err := db.Where(maps).Order("id desc").Find(&contract).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	return contract, nil
+}

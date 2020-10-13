@@ -49,29 +49,37 @@ func PackingCreate(c *gin.Context) {
 		return
 	}
 
-	//查询合同是否存在
-	contract, err := models.ContractInfo(data.Packing.ContractId)
+	//查询项目是否存在
+	project, err := models.ProjectGetInfo(data.Packing.ProjectId)
 	if err != nil {
-		e.ApiErr(c, "合同不存在")
+		e.ApiErr(c, "项目不存在")
 		return
 	}
+
+	//查询仓库
+	depository, err := models.DepositoryGetInfo(data.Packing.DepositoryId)
+	if err != nil {
+		e.ApiErr(c, "请选择打包仓库")
+		return
+	}
+
 	company, _ := c.Get("company")
-	if contract.Id != company.(models.Company).Id {
+	if project.CompanyId != company.(models.CompanyUsers).Company.Id {
 		e.ApiErr(c, "非法请求")
 		return
 	}
-	data.Packing.CompanyId = contract.CompanyId
+	data.Packing.CompanyId = project.CompanyId
 
 	if len(data.Links) > 0 {
 		//先查询数据
 		products_in := make([]int64, len(data.Links))
 		for i, v := range data.Links {
-			products_in[i] = v.Id
+			products_in[i] = v.ProductId
 		}
 		maps := utils.WhereToMap(nil)
-		maps["product_id__in"] = products_in
+		maps["id__in"] = products_in
 		maps["company_id"] = company.(models.CompanyUsers).Company.Id
-		maps["contract_id"] = contract.Id
+		maps["project_id"] = project.Id
 		maps["flag"] = 1
 		products, err := product_service.Select(utils.BuildWhere(maps))
 		if err != nil {
@@ -93,10 +101,19 @@ func PackingCreate(c *gin.Context) {
 						e.ApiErr(c, p.ProjectName+"库存不足")
 						return
 					}
-					data.Links[i].CompanyId = contract.CompanyId
-					data.Links[i].ContractId = contract.Id
+					if v.Count <= 0 {
+						e.ApiErr(c, p.ProjectName+"请输入正确的打包数量")
+						return
+					}
+					//v.CompanyId = project.CompanyId
+					//v.ProjectId = project.Id
+					//v.MaterialId = p.MaterialId
+					//v.MaterialName = p.MaterialName
+					data.Links[i].CompanyId = project.CompanyId
+					data.Links[i].ProjectId = project.Id
 					data.Links[i].MaterialId = p.MaterialId
 					data.Links[i].MaterialName = p.MaterialName
+					data.Links[i].DepositoryId = depository.Id
 				}
 			}
 			if !in_flag {
@@ -114,4 +131,45 @@ func PackingCreate(c *gin.Context) {
 		e.ApiErr(c, "请选择要打包的材料")
 		return
 	}
+}
+
+// 拆包
+func PackingDelete(c *gin.Context) {
+	data := struct {
+		Id int64 `json:"id"`
+	}{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+	company, _ := c.Get("company")
+	if err := packing_service.Delete(data.Id, company.(models.CompanyUsers).Company.Id); err != nil {
+		e.ApiErr(c, err.Error())
+	} else {
+		e.ApiOk(c, "拆包成功", e.GetEmptyStruct())
+	}
+}
+
+// 打包表格
+func PackingTable(c *gin.Context) {
+	data := struct {
+		Id int64 `json:"id"`
+	}{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	company, _ := c.Get("company")
+	list, err := packing_service.Tables(data.Id, company.(models.CompanyUsers).Company.Id)
+	if err != nil {
+		e.ApiErr(c, "非法请求")
+		return
+	}
+
+	e.ApiOk(c, "获取成功", struct {
+		Table interface{} `json:"table"`
+	}{
+		Table: list,
+	})
 }

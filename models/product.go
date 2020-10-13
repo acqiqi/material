@@ -42,12 +42,15 @@ type Product struct {
 	Company             Company    `gorm:"ForeignKey:CompanyId" json:"company"`
 	SupplyCycle         int        `json:"supply_cycle"` // 供货周期
 	MaterialId          int64      `json:"material_id"`  // 材料单id
+	Material            Material   `gorm:"ForeignKey:MaterialId"  json:"material"`
 	PlatformKey         string     `json:"platform_key"` //平台key
 	PlatformUid         string     `json:"platform_uid"` //平台uid
 	PlatformId          string     `json:"platform_id"`  //平台id
 
 	ContractId int64    `json:"contract_id"` //合同
 	Contract   Contract `gorm:"ForeignKey:ContractId" json:"contract"`
+
+	UseNum float64 `json:"use_num"`
 }
 
 // 新增单个产品 带事物
@@ -86,6 +89,12 @@ func ProductEdit(id int64, data interface{}) error {
 	}
 	return nil
 }
+func ProductEditT(id int64, data interface{}, t *gorm.DB) error {
+	if err := t.Model(&Product{}).Where("id = ? AND flag = 1 ", id).Updates(data).Error; err != nil {
+		return err
+	}
+	return nil
+}
 
 // 获取产品详情
 func ProductGetInfo(id int64) (*Product, error) {
@@ -118,7 +127,7 @@ func ProductGetListsCount(maps interface{}) int {
 // 获取材料select
 func ProductGetSelect(maps string) ([]*Product, error) {
 	var product []*Product
-	err := db.Where(maps).Order("id asc").Find(&product).Error
+	err := db.Where(maps).Order("id asc").Preload("Contract").Preload("Material").Find(&product).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}

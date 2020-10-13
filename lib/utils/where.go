@@ -52,14 +52,21 @@ func BuildWhere(maps map[string]interface{}) string {
 			for k, t := range v.([]string) {
 				v.([]string)[k] = "'" + t + "'"
 			}
-			value = strings.Join(v.([]string), ",")
+			value = "(" + strings.Join(v.([]string), ",") + ")"
 			break
-		case []int, []int64:
+		case []int:
 			str_arr := make([]string, len(v.([]int)))
 			for k, t := range v.([]int) {
 				str_arr[k] = strconv.Itoa(t)
 			}
-			value = strings.Join(str_arr, ",")
+			value = "(" + strings.Join(str_arr, ",") + ")"
+			break
+		case []int64:
+			str_arr := make([]string, len(v.([]int64)))
+			for k, t := range v.([]int64) {
+				str_arr[k] = strconv.FormatInt(t, 10)
+			}
+			value = "(" + strings.Join(str_arr, ",") + ")"
 			break
 		}
 		log.Println(value)

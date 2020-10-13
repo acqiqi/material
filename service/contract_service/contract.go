@@ -7,6 +7,7 @@ import (
 	"material/lib/app"
 	"material/lib/utils"
 	"material/models"
+	"strconv"
 )
 
 type ContractAdd struct {
@@ -50,6 +51,12 @@ type ContractAdd struct {
 	IsPlatform            int            `json:"is_platform"`  // 是否三方平台同步
 	BindState             int            `json:"bind_state"`   //是否绑定 0否 1是
 
+}
+
+type ContractSelectData struct {
+	Id           int64  `json:"id"`
+	ContractName string `json:"name"`
+	ContractNo   string `json:"contract_no"` // 合同编号
 }
 
 //新增合同
@@ -211,6 +218,23 @@ func ApiLists(page int, limit int, maps string) ([]ContractAdd, error) {
 			UpdatedAt:             list[i].UpdatedAt,
 			Project:               list[i].Project,
 			Company:               list[i].Company,
+		}
+	}
+	return cb, nil
+}
+
+// 获取Select
+func SelectLists(company_id int64) ([]ContractSelectData, error) {
+	lists, err := models.ContractGetSelect("flag =1 AND company_id = " + strconv.Itoa(int(company_id)))
+	if err != nil {
+		return nil, err
+	}
+	cb := make([]ContractSelectData, len(lists))
+	for i := 0; i < len(lists); i++ {
+		cb[i] = ContractSelectData{
+			Id:           lists[i].Id,
+			ContractName: lists[i].ContractName,
+			ContractNo:   lists[i].ContractNo,
 		}
 	}
 	return cb, nil

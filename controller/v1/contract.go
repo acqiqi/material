@@ -9,6 +9,18 @@ import (
 	"material/service/contract_service"
 )
 
+// 获取合同Select
+func ContractSelect(c *gin.Context) {
+	company, _ := c.Get("company")
+	lists, err := contract_service.SelectLists(company.(models.CompanyUsers).Company.Id)
+	if err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+	e.ApiOk(c, "获取成功", lists)
+	return
+}
+
 // 创建合同
 func ContractCreate(c *gin.Context) {
 	data := contract_service.ContractAdd{}

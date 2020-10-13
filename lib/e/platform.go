@@ -23,3 +23,6 @@ type PlatformProjectReceiveCallback struct {
 	CreatedAt   utils.Time     `json:"created_at"`
 	Status      int            `json:"status"` // 0未同步 1已同步
 }
+
+type PlatformPRCreateCallback struct {
+}

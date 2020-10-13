@@ -6,6 +6,7 @@ import (
 	"material/lib/app"
 	"material/lib/utils"
 	"material/models"
+	"strconv"
 )
 
 type DepositoryAdd struct {
@@ -15,6 +16,13 @@ type DepositoryAdd struct {
 	Address   string `json:"address"`    // 仓库地址
 	CompanyId int64  `json:"company_id"` // 企业id
 	Status    int    `json:"status"`     // 状态 0停用 1正常
+}
+
+type DepositorySelectData struct {
+	Id      int64  `json:"id"`
+	Name    string `json:"name"`    // 仓库名称
+	Desc    string `json:"desc"`    // 描述
+	Address string `json:"address"` // 仓库地址
 }
 
 // 获取Api列表
@@ -75,4 +83,20 @@ func Edit(data *DepositoryAdd) error {
 		return err
 	}
 	return nil
+}
+
+// 获取Select
+func SelectLists(company_id int64) ([]DepositorySelectData, error) {
+	lists, err := models.DepositoryGetSelect("flag =1 AND status = 1 AND company_id = " + strconv.Itoa(int(company_id)))
+	if err != nil {
+		return nil, err
+	}
+	cb := make([]DepositorySelectData, len(lists))
+	for i := 0; i < len(lists); i++ {
+		cb[i] = DepositorySelectData{
+			Id:   lists[i].Id,
+			Name: lists[i].Name,
+		}
+	}
+	return cb, nil
 }

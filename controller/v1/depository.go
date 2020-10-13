@@ -32,7 +32,7 @@ func DepositoryList(c *gin.Context) {
 		Page:  data.Page,
 		Limit: data.Limit,
 		Lists: lists,
-		Total: models.ProductGetListsCount(utils.BuildWhere(maps)),
+		Total: models.DepositoryGetListsCount(utils.BuildWhere(maps)),
 		Map:   data.Map,
 	})
 }
@@ -82,4 +82,16 @@ func DepositoryEdit(c *gin.Context) {
 	}
 	p, _ := models.DepositoryGetInfo(data.Id)
 	e.ApiOk(c, "编辑成功", p)
+}
+
+// 获取仓库Select
+func DepositorySelect(c *gin.Context) {
+	company, _ := c.Get("company")
+	lists, err := depository_service.SelectLists(company.(models.CompanyUsers).Company.Id)
+	if err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+	e.ApiOk(c, "获取成功", lists)
+	return
 }

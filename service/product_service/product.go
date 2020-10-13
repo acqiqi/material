@@ -127,7 +127,7 @@ func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platfor
 	}
 
 	// 创建
-	t := models.NewTransaction()
+	t := *models.NewTransaction()
 	mm := models.Material{
 		Model:          models.Model{},
 		Name:           m_data.Name,
@@ -145,7 +145,7 @@ func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platfor
 		CompanyId:      project.CompanyId,
 		ContractId:     m_data.ContractId, //合同id
 	}
-	models.MaterialAddT(&mm, t)
+	models.MaterialAddT(&mm, &t)
 
 	//处理材料数据
 	validate_item := validation.Validation{}
@@ -213,7 +213,7 @@ func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platfor
 				PlatformId:          data[i].PlatformId,
 				ContractId:          mm.ContractId,
 			}
-			err := models.ProductAddT(&product_model, t)
+			err := models.ProductAddT(&product_model, &t)
 			if err != nil {
 				t.Rollback()
 				return nil, err
@@ -349,4 +349,12 @@ func ApiLists(page int, limit int, maps string) ([]*models.Product, error) {
 // 获取Select列表
 func Select(maps string) ([]*models.Product, error) {
 	return models.ProductGetSelect(maps)
+}
+
+func Tables(project_id int64, company_id int64) ([]*models.Product, error) {
+	maps := utils.WhereToMap(nil)
+	maps["flag"] = 1
+	maps["company_id"] = company_id
+	maps["project_id"] = project_id
+	return models.ProductGetSelect(utils.BuildWhere(maps))
 }
