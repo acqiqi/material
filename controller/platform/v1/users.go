@@ -24,7 +24,8 @@ func UsersDDSyncQrcode(c *gin.Context) {
 		return
 	}
 
-	_, err := models.GetUsersInfoDD(data.PlatformUid)
+	platform, _ := c.Get("platform")
+	_, err := models.PlatformUsersCheckUser(data.PlatformUid, platform.(models.Platform).PlatformKey)
 	if err == nil {
 		e.ApiErr(c, "已经绑定，请勿重复绑定")
 		return

@@ -27,19 +27,21 @@ type user_info_api struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
 	Data struct {
-		ID       int64  `json:"id"`
-		Username string `json:"username"`
-		Password string `json:"password"`
-		Mobile   string `json:"mobile"`
-		Nickname string `json:"nickname"`
-		Email    string `json:"email"`
-		Avatar   string `json:"avatar"`
-		Gender   string `json:"gender"`
-		Status   int    `json:"status"`
-		Score    int    `json:"score"`
-		Money    string `json:"money"`
-		OkMoney  string `json:"ok_money"`
-		NoMoney  string `json:"no_money"`
+		UserInfo struct {
+			ID       int64  `json:"id"`
+			Username string `json:"username"`
+			Password string `json:"password"`
+			Mobile   string `json:"mobile"`
+			Nickname string `json:"nickname"`
+			Email    string `json:"email"`
+			Avatar   string `json:"avatar"`
+			Gender   string `json:"gender"`
+			Status   int    `json:"status"`
+			Score    int    `json:"score"`
+			Money    string `json:"money"`
+			OkMoney  string `json:"ok_money"`
+			NoMoney  string `json:"no_money"`
+		} `json:"user_info"`
 	} `json:"data"`
 }
 
@@ -90,13 +92,13 @@ func AutoLogin(c *gin.Context) {
 
 	uid := int64(0)
 	//查询本地是否注册
-	my_user_info, err := models.GetUsersInfoCuid(user_info.Data.ID)
+	my_user_info, err := models.GetUsersInfoCuid(user_info.Data.UserInfo.ID)
 	if err != nil {
 		//直接注册
 		user_model := models.Users{
-			Cuid:     int(user_info.Data.ID),
-			Nickname: user_info.Data.Nickname,
-			Avatar:   user_info.Data.Avatar,
+			Cuid:     int(user_info.Data.UserInfo.ID),
+			Nickname: user_info.Data.UserInfo.Nickname,
+			Avatar:   user_info.Data.UserInfo.Avatar,
 			MUserKey: models.GetMUserKey(),
 		}
 		if err := models.AddUsers(&user_model); err != nil {

@@ -70,10 +70,12 @@ type Platform struct {
 var PlatformSetting = &Platform{}
 
 type Wechat struct {
-	SmallAppID string
-	AppSecret  string
-	MCHID      string
-	PayKey     string
+	SmallAppID  string
+	AppSecret   string
+	MPAppId     string
+	MPAppSecret string
+	MCHID       string
+	PayKey      string
 }
 
 var WechatSetting = &Wechat{}
