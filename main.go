@@ -21,8 +21,8 @@ func init() {
 	logging.Setup() //日志
 	gredis.Setup()  // redis
 	//utils.InitModel()
-	m := models.ContractConfig{}
-	log.Println(utils.JsonEncode(m))
+
+	utils.PDFT()
 }
 
 func main() {

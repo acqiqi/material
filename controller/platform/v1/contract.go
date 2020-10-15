@@ -5,6 +5,7 @@ import (
 	"material/lib/e"
 	"material/models"
 	"material/service/contract_service"
+	"material/service/receiver_service"
 )
 
 // 合同同步
@@ -12,6 +13,7 @@ func ContractSync(c *gin.Context) {
 	data := struct {
 		Info   contract_service.ContractAdd       `json:"info"`
 		Config contract_service.ContractConfigAdd `json:"config"`
+		Users  []receiver_service.UserAdd         `json:"users"`
 	}{}
 	if err := c.BindJSON(&data); err != nil {
 		e.ApiErr(c, err.Error())
@@ -56,11 +58,21 @@ func ContractSync(c *gin.Context) {
 	data.Config.ContractId = cb.Id
 	conf_cb, err := contract_service.AddConfig(&data.Config)
 	p, _ := models.ContractInfo(cb.Id)
+
+	//检查和绑定用户
+	user_cb, err := receiver_service.SyncUsers(data.Users, p, platform.(models.Platform).PlatformKey)
+	if err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
 	e.ApiOk(c, "创建成功", struct {
-		Info   models.Contract       `json:"info"`
-		Config models.ContractConfig `json:"config"`
+		Info   models.Contract                          `json:"info"`
+		Config models.ContractConfig                    `json:"config"`
+		Users  []receiver_service.ReceiverUsersCallback `json:"users"`
 	}{
 		Info:   *p,
 		Config: *conf_cb,
+		Users:  user_cb,
 	})
 }

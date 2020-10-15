@@ -10,7 +10,7 @@ type Packing struct {
 	ReturnCount float64  `json:"return_count"` // 包装下退货数量
 	Remark      string   `json:"remark"`       // 描述
 	CompanyId   int64    `json:"company_id"`
-	Company     Contract `gorm:"ForeignKey:CompanyId" json:"Company"`
+	Company     Contract `gorm:"ForeignKey:CompanyId" json:"company"`
 	ProductId   int64    `json:"product_id"`
 	MaterialId  int64    `json:"material_id"`
 	Material    Material `gorm:"ForeignKey:MaterialId" json:"material"`

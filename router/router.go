@@ -101,6 +101,7 @@ func InitRouter() *gin.Engine {
 
 		// 用户部分
 		api_platformv1.POST("/users_dd_sync_qrcode", platform_v1.UsersDDSyncQrcode) //获取同步用户二维码
+		api_platformv1.POST("/users_sync", platform_v1.UsersSync)                   //同步用户
 	}
 
 	return r

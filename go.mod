@@ -12,6 +12,7 @@ require (
 	github.com/gohouse/converter v0.0.3
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/jinzhu/gorm v1.9.16
+	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/nanjishidu/gomini v1.4.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/swaggo/gin-swagger v1.2.0

@@ -7,6 +7,7 @@ import (
 	"material/lib/setting"
 	"material/lib/utils"
 	"material/models"
+	"material/service/receiver_service"
 )
 
 // 去小程序绑定的Qrcode 是没有到任何子企业的
@@ -50,4 +51,37 @@ func UsersDDSyncQrcode(c *gin.Context) {
 			Qrcode: b64,
 		})
 	}
+}
+
+func UsersSync(c *gin.Context) {
+
+	data := struct {
+		//CompanyId  int64                      `json:"company_id"`
+		ContractId int64                      `json:"contract_id"`
+		Users      []receiver_service.UserAdd `json:"users"`
+	}{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	contract, err := models.ContractInfo(data.ContractId)
+	if err != nil {
+		e.ApiErr(c, "合同不存在")
+		return
+	}
+
+	platform, _ := c.Get("platform")
+	if contract.PlatformKey != platform.(models.Platform).PlatformKey {
+		e.ApiErr(c, "非法请求")
+		return
+	}
+
+	//检查和绑定用户
+	cb, err := receiver_service.SyncUsers(data.Users, contract, platform.(models.Platform).PlatformKey)
+	if err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+	e.ApiOk(c, "同步成功", cb)
 }
