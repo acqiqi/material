@@ -13,6 +13,7 @@ type PackingProductAdd struct {
 	MaterialId    int64   `json:"material_id"`
 	Count         float64 `json:"count"`         // 打包数量
 	ReturnCount   float64 `json:"return_count"`  // 退货数量
+	ReceiveCount  float64 `json:"receive_count"` //签收数量
 	MaterialName  string  `json:"material_name"` // 产品名称
 
 	ContractId int64           `json:"contract_id"` //合同

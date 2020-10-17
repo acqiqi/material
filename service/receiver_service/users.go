@@ -19,19 +19,22 @@ type ReceiverUsers struct {
 type UserAdd struct {
 	PlatformUid string `json:"platform_uid"`
 	Mobile      string `json:"mobile"`
+	Nickname    string `json:"nickname"`
 }
 
 type ReceiverUsersCallback struct {
 	Id          int64  `json:"id"`
 	CompanyId   int64  `json:"company_id"`
-	ContractId  int64  `json:"contract_id"`
+	ProjectId   int64  `json:"project_id"`
 	Cuid        int64  `json:"cuid"`
 	PlatformKey string `json:"platform_key"`
 	PlatformUid string `json:"platform_uid"`
+	Nickname    string `json:"nickname"`
+	Mobile      string `json:"mobile"`
 }
 
 // 同步用户
-func SyncUsers(users []UserAdd, contract *models.Contract, platform_key string) ([]ReceiverUsersCallback, error) {
+func SyncUsers(users []UserAdd, project *models.Project, platform_key string) ([]ReceiverUsersCallback, error) {
 	dd_utils := new(dd.UCUtils)
 	if _, err := dd_utils.GetToken(); err != nil {
 		return []ReceiverUsersCallback{}, err
@@ -40,6 +43,9 @@ func SyncUsers(users []UserAdd, contract *models.Contract, platform_key string) 
 	//第一层检测
 	for _, v := range users {
 		if v.PlatformUid != "" {
+			if v.Nickname == "" {
+				continue //跳过不操作
+			}
 			// 检测三方是否注册
 			cloud_user, err := dd_utils.GetUserInfoOrMobile(v.Mobile)
 			if err != nil {
@@ -54,11 +60,13 @@ func SyncUsers(users []UserAdd, contract *models.Contract, platform_key string) 
 			if err != nil {
 				//直接注册 奥利给
 				user, err = MobileReg(models.ReceiverUsers{
-					CompanyId:   contract.CompanyId,
-					ContractId:  contract.Id,
+					CompanyId:   project.CompanyId,
+					ProjectId:   project.Id,
 					Cuid:        cloud_user.Data.UserInfo.Id,
 					PlatformKey: platform_key,
 					PlatformUid: v.PlatformUid,
+					Nickname:    v.Nickname,
+					Mobile:      v.Mobile,
 				})
 				if err != nil {
 					continue //直接跳出业务不成立
@@ -69,7 +77,7 @@ func SyncUsers(users []UserAdd, contract *models.Contract, platform_key string) 
 			if err != nil {
 				//直接注册
 				user_model := models.Users{
-					Cuid:     int(cloud_user.Data.UserInfo.Id),
+					Cuid:     cloud_user.Data.UserInfo.Id,
 					Nickname: cloud_user.Data.UserInfo.Nickname,
 					Avatar:   cloud_user.Data.UserInfo.Avatar,
 					MUserKey: models.GetMUserKey(),
@@ -80,10 +88,12 @@ func SyncUsers(users []UserAdd, contract *models.Contract, platform_key string) 
 			cb_users = append(cb_users, ReceiverUsersCallback{
 				Id:          user.Id,
 				CompanyId:   user.CompanyId,
-				ContractId:  user.ContractId,
+				ProjectId:   user.ProjectId,
 				Cuid:        user.Cuid,
 				PlatformKey: user.PlatformKey,
 				PlatformUid: user.PlatformUid,
+				Nickname:    user.Nickname,
+				Mobile:      user.Mobile,
 			})
 		} // 不注册
 	}

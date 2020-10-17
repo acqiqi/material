@@ -2,25 +2,31 @@ package packing_service
 
 import (
 	"errors"
+	"fmt"
 	"github.com/astaxie/beego/validation"
+	"github.com/jung-kurt/gofpdf"
 	uuid "github.com/satori/go.uuid"
+	"io/ioutil"
 	"log"
 	"material/lib/app"
+	"material/lib/setting"
 	"material/lib/utils"
 	"material/models"
+	"strconv"
 )
 
 //打包
 type PackingAdd struct {
-	Id          int64   `json:"id"`
-	PackingName string  `json:"packing_name"` // 包装名称
-	SerialNo    string  `json:"serial_no"`    // 包装编号
-	Count       float64 `json:"count"`        // 产品总数
-	ReturnCount float64 `json:"return_count"` // 包装下退货数量
-	Remark      string  `json:"remark"`       // 描述
-	CompanyId   int64   `json:"company_id"`
-	ProductId   int64   `json:"product_id"`
-	MaterialId  int64   `json:"material_id"`
+	Id           int64   `json:"id"`
+	PackingName  string  `json:"packing_name"`  // 包装名称
+	SerialNo     string  `json:"serial_no"`     // 包装编号
+	Count        float64 `json:"count"`         // 产品总数
+	ReturnCount  float64 `json:"return_count"`  // 包装下退货数量
+	ReceiveCount float64 `json:"receive_count"` //签收数量
+	Remark       string  `json:"remark"`        // 描述
+	CompanyId    int64   `json:"company_id"`
+	ProductId    int64   `json:"product_id"`
+	MaterialId   int64   `json:"material_id"`
 
 	ContractId int64           `json:"contract_id"` //合同
 	Contract   models.Contract `gorm:"ForeignKey:ContractId" json:"contract"`
@@ -93,7 +99,7 @@ func Add(data PackingAdd, links []PackingProductAdd) (*models.Packing, error) {
 			ReturnCount:   0,
 			MaterialName:  v.MaterialName,
 			ContractId:    v.ContractId,
-			ProjectId:     v.ProductId,
+			ProjectId:     v.ProjectId,
 			DepositoryId:  v.DepositoryId,
 		}
 		models.PackingProductAddT(&link_model, &t)
@@ -217,4 +223,50 @@ func Tables(project_id int64, company_id int64) ([]*models.Packing, error) {
 // 获取Select列表
 func Select(maps string) ([]*models.Packing, error) {
 	return models.PackingGetSelect(maps)
+}
+
+// 生成二维码
+func QrcodeBuild(packing models.Packing) (string, error) {
+	c := gofpdf.InitType{
+		Size: gofpdf.SizeType{
+			Wd: 160,
+			Ht: 80,
+		},
+	}
+	// 获取二维码
+	wechatUtils := new(utils.WechatUtils)
+	wechatUtils.SmallQrcodeData.Path = "pages/packing/packing?id=" + strconv.FormatInt(packing.Id, 10)
+	wechatUtils.SmallQrcodeData.Width = 430
+	wechatUtils.Init(setting.WechatSetting.SmallAppID, setting.WechatSetting.AppSecret)
+	wechatUtils.GetAccessToken()
+	b, err := wechatUtils.GetSmallQrcode()
+	if err != nil {
+		log.Println(err.Error())
+		return "", err
+	}
+	ioutil.WriteFile("static/qrcode/"+strconv.FormatInt(packing.Id, 10)+".jpg", b, 0755)
+
+	pdf := gofpdf.NewCustom(&c)
+	pdf.AddUTF8Font("u8font", "", "ttf/pdf.ttf")
+	//pdf.SetCellMargin(0)
+	//pdf.SetLeftMargin(0)
+	//pdf.SetTopMargin(0)
+	//pdf.SetTopMargin(0)
+	pdf.AddPage()
+	pdf.Image("static/qrcode/"+strconv.FormatInt(packing.Id, 10)+".jpg", 10, 10, 60, 60, false, "", 0, "")
+	//pdf.Text(60, 10, "所属项目：哈哈哈哈哈哈哈哈哈哈")
+	//pdf.SetY(pdf.SetY(0)            //先要设置 Y，然后再设置 X。否则，会导致 X 失效
+	pdf.SetY(10) //水平居中的算法0)            //先要设置 Y，然后再设置 X。否则，会导致 X 失效
+	pdf.SetX(70) //水平居中的算法
+	pdf.SetFont("u8font", "", 20)
+	pdf.MultiCell(90, 9,
+		fmt.Sprintf("项目名称：%s \n\r包装名称：%s \n\r",
+			packing.Project.ProjectName,
+			packing.PackingName), "", "Left", false)
+	fileStr := setting.AppSetting.StaticUrl + "static/pdf/" + strconv.FormatInt(packing.Id, 10) + ".pdf"
+	err = pdf.OutputFileAndClose("static/pdf/" + strconv.FormatInt(packing.Id, 10) + ".pdf")
+	if err != nil {
+		return "", err
+	}
+	return fileStr, nil
 }

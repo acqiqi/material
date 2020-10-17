@@ -7,11 +7,12 @@ type Send struct {
 	Model
 	SendNo            string   `json:"send_no"`            // 订单编号
 	Count             float64  `json:"count"`              // 发货总数
+	ReturnCount       float64  `json:"return_count"`       // 退货数量
 	ActualReceiver    string   `json:"actual_receiver"`    // 签收人
 	Address           string   `json:"address"`            // 收货地址
-	RecevieAttachment string   `json:"recevie_attachment"` // 收货附件
-	RecevieDate       string   `json:"recevie_date"`       // 收货时间
-	RecevieCount      float64  `json:"recevie_count"`      // 收货总数量
+	ReceiveAttachment string   `json:"receive_attachment"` // 收货附件
+	ReceiveDate       string   `json:"receive_date"`       // 收货时间
+	ReceiveCount      float64  `json:"receive_count"`      // 收货总数量
 	ReceiveRemark     string   `json:"receive_remark"`     // 收货备注
 	Remark            string   `json:"remark"`             // 备注
 	CompanyId         int64    `json:"company_id"`         //
@@ -21,6 +22,20 @@ type Send struct {
 	Project   Project `gorm:"ForeignKey:ProjectId" json:"project"`
 
 	ExpressNo string `json:"express_no"`
+
+	Status int `json:"status"` //0未签收 1签收
+
+	Packing []Packing `gorm:"ForeignKey:SendId" json:"packing"`
+}
+
+// 发货详情
+func SendGetInfo(id int64) (*Send, error) {
+	var d Send
+	err := db.Where("id = ? AND flag = 1", id).Preload("Company").Preload("Packing").Preload("Project").First(&d).Error
+	if err != nil {
+		return &Send{}, err
+	}
+	return &d, nil
 }
 
 // 发货列表
@@ -58,9 +73,17 @@ func SendAddT(packing *Send, t *gorm.DB) error {
 	return nil
 }
 
-// 编辑仓库
+// 编辑发货
 func SendEdit(id int64, data interface{}) error {
 	if err := db.Model(&Send{}).Where("id = ? AND flag = 1 ", id).Updates(data).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+// 编辑发货
+func SendEditT(id int64, data interface{}, t *gorm.DB) error {
+	if err := t.Model(&Send{}).Where("id = ? AND flag = 1 ", id).Updates(data).Error; err != nil {
 		return err
 	}
 	return nil

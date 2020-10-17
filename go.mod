@@ -14,6 +14,7 @@ require (
 	github.com/jinzhu/gorm v1.9.16
 	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/nanjishidu/gomini v1.4.1
+	github.com/qiniu/api.v7/v7 v7.6.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/tealeg/xlsx v1.0.5 // indirect

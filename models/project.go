@@ -32,7 +32,10 @@ type Project struct {
 	PlatformId        string  `json:"platform_id"`        // 平台用户id
 	IsPlatform        int     `json:"is_platform"`        // 是否三方平台同步
 
-	ReceiveTime utils.Time `json:"receive_time"` //接收时间
+	ReceiveTime   utils.Time      `json:"receive_time"` //接收时间
+	ReceiverUsers []ReceiverUsers `gorm:"ForeignKey:ProjectId" json:"receiver_users"`
+
+	ReceiverAddress string `json:"receiver_address"` //收货地址
 
 }
 
@@ -60,7 +63,7 @@ func ProjectCheck(platform_id string, platform_key string, platform_uid string) 
 // 获取项目列表
 func ProjectGetLists(pageNum int, pageSize int, maps interface{}) ([]*Project, error) {
 	var projects []*Project
-	err := db.Model(&Project{}).Preload("Company").Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Find(&projects).Error
+	err := db.Model(&Project{}).Preload("Company").Preload("ReceiverUsers").Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Find(&projects).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}

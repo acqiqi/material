@@ -4,16 +4,19 @@ import "github.com/jinzhu/gorm"
 
 type PackingProduct struct {
 	Model
-	PackingId     int64   `orm:"packing_id"`     // 打包id
-	CompanyId     int64   `orm:"company_id"`     // 企业id
-	OrderReturnid int64   `orm:"order_returnid"` // 订单退货详情id
-	ProductId     int64   `orm:"product_id"`
+	PackingId int64   `json:"packing_id"` // 打包id
+	Packing   Packing `gorm:"ForeignKey:PackingId" json:"packing"`
+
+	CompanyId     int64   `json:"company_id"`     // 企业id
+	OrderReturnid int64   `json:"order_returnid"` // 订单退货详情id
+	ProductId     int64   `json:"product_id"`
 	Product       Product `gorm:"ForeignKey:ProductId" json:"product"`
 
-	MaterialId   int64   `orm:"material_id"`
-	Count        float64 `orm:"count"`         // 打包数量
-	ReturnCount  float64 `orm:"return_count"`  // 退货数量
-	MaterialName string  `orm:"material_name"` // 产品名称
+	MaterialId   int64   `json:"material_id"`
+	Count        float64 `json:"count"`         // 打包数量
+	ReturnCount  float64 `json:"return_count"`  // 退货数量
+	ReceiveCount float64 `json:"receive_count"` //签收数量
+	MaterialName string  `json:"material_name"` // 产品名称
 
 	ContractId int64    `json:"contract_id"` //合同
 	Contract   Contract `gorm:"ForeignKey:ContractId" json:"contract"`
@@ -25,6 +28,16 @@ type PackingProduct struct {
 	Depository   Depository `gorm:"ForeignKey:DepositoryId" json:"depository"`
 
 	Status int `json:"status"` //0已打包 1已发货 4已收货 已验收
+}
+
+// 获取详情
+func PackingProductGetInfo(id int64) (*PackingProduct, error) {
+	var d PackingProduct
+	err := db.Where("id = ? AND flag = 1", id).Preload("Project").Preload("Product").Preload("Packing").First(&d).Error
+	if err != nil {
+		return &PackingProduct{}, err
+	}
+	return &d, nil
 }
 
 // 新增打包 T
@@ -49,6 +62,13 @@ func PackingProductGetLists(pageNum int, pageSize int, maps interface{}) ([]*Pac
 // 编辑打包产品
 func PackingProductEditT(id int64, data interface{}, t *gorm.DB) error {
 	if err := t.Model(&PackingProduct{}).Where("id = ? AND flag = 1 ", id).Updates(data).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func PackingProductEdit(id int64, data interface{}) error {
+	if err := db.Model(&PackingProduct{}).Where("id = ? AND flag = 1 ", id).Updates(data).Error; err != nil {
 		return err
 	}
 	return nil

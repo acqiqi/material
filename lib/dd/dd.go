@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"log"
+	"material/lib/e"
 	"material/lib/setting"
 	"material/lib/utils"
 	"net/http"
@@ -19,10 +20,11 @@ type UCUtils struct {
 var UC_UTILS_BASE_URL = ""
 
 const (
-	UC_MY_PLATFORM_KEY  = "material"
-	UC_API_GET_TOKEN    = "platform_auth/get_access_token" //获取token
-	UC_API_MOBILE_CHECK = "platform/v1/mobile_check"       //检测手机号是否注册
-	UC_API_MOBILE_REG   = "platform/v1/mobile_reg"         //手机号注册
+	UC_MY_PLATFORM_KEY   = "material"
+	UC_API_GET_TOKEN     = "platform_auth/get_access_token" //获取token
+	UC_API_MOBILE_CHECK  = "platform/v1/mobile_check"       //检测手机号是否注册
+	UC_API_MOBILE_REG    = "platform/v1/mobile_reg"         //手机号注册
+	UC_API_GET_USER_INFO = "api/v1/get_user_info"           //用户信息
 
 )
 
@@ -85,6 +87,24 @@ func (d *UCUtils) UserMobileReg(mobile string) (UserInfoData, error) {
 		return *data, nil
 	} else {
 		return UserInfoData{}, errors.New(data.Msg)
+	}
+}
+
+// 获取用户信息
+func (d *UCUtils) UserGetInfo(user_token string) (UserInfoData, error) {
+	data := new(UserInfoData)
+
+	if err := httpPostJson(setting.PlatformSetting.ApiBaseUrl+UC_API_GET_USER_INFO, e.GetEmptyStruct(), map[string]string{
+		"Authorization": user_token,
+		"PlatformKey":   setting.PlatformSetting.PlatformKey,
+	}, &data); err != nil {
+		return UserInfoData{}, err
+	}
+	log.Println(data)
+	if data.Code == 0 {
+		return *data, nil
+	} else {
+		return *data, errors.New(data.Msg)
 	}
 }
 

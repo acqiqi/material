@@ -26,6 +26,7 @@ type App struct {
 	LogSaveName string
 	LogFileExt  string
 	TimeFormat  string
+	StaticUrl   string //静态url
 }
 
 var AppSetting = &App{}
@@ -80,6 +81,15 @@ type Wechat struct {
 
 var WechatSetting = &Wechat{}
 
+type Qiniu struct {
+	AccessKey string
+	SecretKey string
+	Bucket    string
+	Domain    string
+}
+
+var QiniuSetting = &Qiniu{}
+
 var cfg *ini.File
 
 // Setup initialize the configuration instance
@@ -96,6 +106,7 @@ func Setup() {
 	mapTo("redis", RedisSetting)
 	mapTo("platform", PlatformSetting)
 	mapTo("wechat", WechatSetting)
+	mapTo("qiniu", QiniuSetting)
 	AppSetting.ImageMaxSize = AppSetting.ImageMaxSize * 1024 * 1024
 	ServerSetting.ReadTimeout = ServerSetting.ReadTimeout * time.Second
 	ServerSetting.WriteTimeout = ServerSetting.WriteTimeout * time.Second

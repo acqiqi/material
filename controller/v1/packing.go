@@ -173,3 +173,38 @@ func PackingTable(c *gin.Context) {
 		Table: list,
 	})
 }
+
+//查看二維碼
+func PackingLookQrcode(c *gin.Context) {
+	data := struct {
+		Id int64 `json:"id"`
+	}{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	//查询打包
+	packing, err := models.PackingGetInfo(data.Id)
+	if err != nil {
+		e.ApiErr(c, "打包信息不存在")
+		return
+	}
+
+	company, _ := c.Get("company")
+	if packing.CompanyId != company.(models.CompanyUsers).Company.Id {
+		e.ApiErr(c, "非法请求")
+		return
+	}
+
+	cb_url, err := packing_service.QrcodeBuild(*packing)
+	if err != nil {
+		e.ApiErr(c, "获取失败"+err.Error())
+	} else {
+		e.ApiOk(c, "获取成功", struct {
+			Url string `json:"url"`
+		}{
+			Url: cb_url,
+		})
+	}
+}

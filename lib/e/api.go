@@ -21,6 +21,10 @@ type ApiPageLists struct {
 	OptParm map[string]interface{} `json:"opt_parm"`
 }
 
+type ApiId struct {
+	Id int64 `json:"id"`
+}
+
 //检测默认值
 func CheckApiPageListDefault(cb *ApiPageLists) {
 	if cb.Page <= 0 {

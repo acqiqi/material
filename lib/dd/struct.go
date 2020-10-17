@@ -49,7 +49,7 @@ type UcenterUsers struct {
 }
 
 type CallbackData struct {
-	Code int64  `json:"code"`
+	Code int    `json:"code"`
 	Msg  string `json:"msg"`
 }
 

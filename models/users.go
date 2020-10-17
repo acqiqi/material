@@ -7,7 +7,7 @@ import (
 
 type Users struct {
 	Model
-	Cuid     int    `json:"cuid"`       // ucenter用户id
+	Cuid     int64  `json:"cuid"`       // ucenter用户id
 	Username string `json:"username"`   // 账号 - 暂时不用
 	Password string `json:"password"`   // 密码 - 暂时不用
 	Nickname string `json:"nickname"`   // 昵称

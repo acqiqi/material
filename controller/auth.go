@@ -96,7 +96,7 @@ func AutoLogin(c *gin.Context) {
 	if err != nil {
 		//直接注册
 		user_model := models.Users{
-			Cuid:     int(user_info.Data.UserInfo.ID),
+			Cuid:     user_info.Data.UserInfo.ID,
 			Nickname: user_info.Data.UserInfo.Nickname,
 			Avatar:   user_info.Data.UserInfo.Avatar,
 			MUserKey: models.GetMUserKey(),
@@ -105,9 +105,9 @@ func AutoLogin(c *gin.Context) {
 			e.ApiErr(c, err.Error())
 			return
 		}
-		uid = int64(user_model.Cuid)
+		uid = user_model.Cuid
 	} else {
-		uid = int64(my_user_info.Cuid)
+		uid = my_user_info.Cuid
 	}
 
 	log.Println(uid)

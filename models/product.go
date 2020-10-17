@@ -50,7 +50,7 @@ type Product struct {
 	ContractId int64    `json:"contract_id"` //合同
 	Contract   Contract `gorm:"ForeignKey:ContractId" json:"contract"`
 
-	UseNum float64 `json:"use_num"`
+	//UseNum float64 `json:"use_num"`
 }
 
 // 新增单个产品 带事物
@@ -99,7 +99,16 @@ func ProductEditT(id int64, data interface{}, t *gorm.DB) error {
 // 获取产品详情
 func ProductGetInfo(id int64) (*Product, error) {
 	var project Product
-	err := db.Where("id = ? AND flag =1", id).Preload("Company").First(&project).Error
+	err := db.Where("id = ? AND flag =1", id).Preload("Company").Preload("Project").First(&project).Error
+	if err != nil {
+		return &Product{}, err
+	}
+	return &project, nil
+}
+
+func ProductGetInfoT(id int64, t *gorm.DB) (*Product, error) {
+	var project Product
+	err := t.Where("id = ? AND flag =1", id).Preload("Company").Preload("Project").First(&project).Error
 	if err != nil {
 		return &Product{}, err
 	}

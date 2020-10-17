@@ -4,16 +4,17 @@ import "github.com/jinzhu/gorm"
 
 type Packing struct {
 	Model
-	PackingName string   `json:"packing_name"` // 包装名称
-	SerialNo    string   `json:"serial_no"`    // 包装编号
-	Count       float64  `json:"count"`        // 产品总数
-	ReturnCount float64  `json:"return_count"` // 包装下退货数量
-	Remark      string   `json:"remark"`       // 描述
-	CompanyId   int64    `json:"company_id"`
-	Company     Contract `gorm:"ForeignKey:CompanyId" json:"company"`
-	ProductId   int64    `json:"product_id"`
-	MaterialId  int64    `json:"material_id"`
-	Material    Material `gorm:"ForeignKey:MaterialId" json:"material"`
+	PackingName  string   `json:"packing_name"`  // 包装名称
+	SerialNo     string   `json:"serial_no"`     // 包装编号
+	Count        float64  `json:"count"`         // 产品总数
+	ReturnCount  float64  `json:"return_count"`  // 包装下退货数量
+	ReceiveCount float64  `json:"receive_count"` //签收数量
+	Remark       string   `json:"remark"`        // 描述
+	CompanyId    int64    `json:"company_id"`
+	Company      Contract `gorm:"ForeignKey:CompanyId" json:"company"`
+	ProductId    int64    `json:"product_id"`
+	MaterialId   int64    `json:"material_id"`
+	Material     Material `gorm:"ForeignKey:MaterialId" json:"material"`
 
 	ProjectId int64   `json:"project_id"`
 	Project   Project `gorm:"ForeignKey:ProjectId" json:"project"`
@@ -32,7 +33,7 @@ type Packing struct {
 // 产品类型详情
 func PackingGetInfo(id int64) (*Packing, error) {
 	var pc Packing
-	err := db.Where("id = ? AND flag = 1", id).Preload("Company").First(&pc).Error
+	err := db.Where("id = ? AND flag = 1", id).Preload("Company").Preload("Project").First(&pc).Error
 	if err != nil {
 		return &Packing{}, err
 	}

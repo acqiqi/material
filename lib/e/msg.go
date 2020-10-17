@@ -13,6 +13,14 @@ var MsgFlags = map[int]string{
 
 	ERROR_COMPANY_HEADER: "公司参数有误",
 	ERROR_COMPANY_NOT:    "公司数据有误",
+
+	API_NOT_AUTH_CODE:               "超时",
+	API_USER_STOP_CODE:              "当前用户停用",
+	API_USER_DISABLED_CODE:          "禁用",
+	API_NOT_AUTH_REG_CODE:           "用户没有手机绑定注册",
+	API_NOT_AUTH_BIND_CODE:          "沒有綁定用戶信息", //沒有綁定用戶信息 == 沒註冊
+	API_USER_VALIDATE_IMEI_ERR_CODE: "imei不对",   //imei不对
+	API_PLATFORM_ERR:                "平台不存在",    //平台不存在
 }
 
 // GetMsg get error information based on Code

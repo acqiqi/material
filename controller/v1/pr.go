@@ -19,6 +19,10 @@ func PrCheckPrice(c *gin.Context) {
 		Id   int64 `json:"id"`
 		Type int   `json:"type"`
 	}{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
 
 	price, sw, err := pr_service.CheckPrice(data.Id, data.Type)
 	if err != nil {
