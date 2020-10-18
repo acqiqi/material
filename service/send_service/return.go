@@ -7,7 +7,9 @@ import (
 )
 
 type SendReturn struct {
-	Id               int64    `json:"id"`
+	Id           int64  `json:"id"`
+	MaterialName string `json:"material_name"` // 材料名称
+
 	SendId           int64    `json:"send_id"`
 	PackingId        int64    `json:"packing_id"`
 	ProductId        int64    `json:"product_id"`
@@ -95,6 +97,7 @@ func AddReturn(data SendReturn) (models.SendReturn, error) {
 		UseCount:         data.UseCount,
 		ReturnType:       data.ReturnType,
 		CompanyId:        pp.CompanyId,
+		MaterialName:     pp.Product.MaterialName,
 	}
 	err = models.SendReturnAdd(&model)
 	if err != nil {
@@ -124,4 +127,10 @@ func AddReturn(data SendReturn) (models.SendReturn, error) {
 
 	cb, _ := models.SendReturnGetInfo(model.Id)
 	return *cb, nil
+}
+
+// 退货列表
+func ApiListsReturn(page int, limit int, maps string) ([]*models.SendReturn, error) {
+	offset := (page - 1) * limit
+	return models.SendReturnGetLists(offset, limit, maps)
 }

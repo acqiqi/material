@@ -61,8 +61,10 @@ func InitRouter() *gin.Engine {
 			apiv2.POST("/product_class_edit", v1.ProductClassEdit)     //编辑材料类型
 			apiv2.POST("/product_class_delete", v1.ProductClassDelete) //删除材料类型
 
-			apiv2.POST("/product_list", v1.ProductList)   //材料列表
-			apiv2.POST("/product_table", v1.ProductTable) //材料表格
+			apiv2.POST("/product_list", v1.ProductList)              //材料列表
+			apiv2.POST("/return_product_list", v1.ReturnProductList) //退货列表
+			apiv2.POST("/product_info", v1.ProductInfo)              //材料详情
+			apiv2.POST("/product_table", v1.ProductTable)            //材料表格
 
 			//仓库
 			apiv2.POST("/depository_create", v1.DepositoryCreate) //创建昂库
@@ -81,6 +83,7 @@ func InitRouter() *gin.Engine {
 			apiv2.POST("/send_create", v1.SendCreate)          //发货
 			apiv2.POST("/send_list", v1.SendList)              //发货列表
 			apiv2.POST("/send_look_qrcode", v1.SendLookQrcode) //发货列表
+			apiv2.POST("/send_return_info", v1.SendReturnInfo) //退货详情
 
 			// 请款相关
 			apiv2.POST("/pr_type_select", v1.PrTypeSelect) //获取请款type

@@ -11,6 +11,7 @@ import (
 	"material/models"
 	"material/router"
 	"net/http"
+	"runtime"
 )
 
 func init() {
@@ -42,5 +43,6 @@ func main() {
 	}
 
 	log.Printf("[info] start http server listening %s", endPoint)
+	log.Println(runtime.Version())
 	server.ListenAndServe()
 }

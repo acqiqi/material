@@ -145,3 +145,23 @@ func SendLookQrcode(c *gin.Context) {
 		})
 	}
 }
+
+func SendReturnInfo(c *gin.Context) {
+	data := e.ApiId{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	info, err := models.SendReturnGetInfo(data.Id)
+	if err != nil {
+		e.ApiErr(c, "产品不存在")
+		return
+	}
+
+	e.ApiOk(c, "获取成功", struct {
+		Info models.SendReturn `json:"info"`
+	}{
+		Info: *info,
+	})
+}

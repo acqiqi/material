@@ -4,9 +4,11 @@ import "github.com/jinzhu/gorm"
 
 type SendReturn struct {
 	Model
+	MaterialName     string  `json:"material_name"` // 材料名称
 	SendId           int64   `json:"send_id"`
 	PackingId        int64   `json:"packing_id"`
 	ProductId        int64   `json:"product_id"`
+	Product          Product `gorm:"ForeignKey:ProductId" json:"product"`
 	PackingProductId int64   `json:"packing_product_id"`
 	ProjectId        int64   `json:"project_id"`
 	Cuid             int64   `json:"cuid"`
@@ -26,7 +28,7 @@ type SendReturn struct {
 // 退货详情
 func SendReturnGetInfo(id int64) (*SendReturn, error) {
 	var d SendReturn
-	err := db.Where("id = ? AND flag = 1", id).Preload("Company").First(&d).Error
+	err := db.Where("id = ? AND flag = 1", id).Preload("Product").Preload("Company").First(&d).Error
 	if err != nil {
 		return &SendReturn{}, err
 	}
@@ -36,7 +38,7 @@ func SendReturnGetInfo(id int64) (*SendReturn, error) {
 // 退货列表
 func SendReturnGetLists(pageNum int, pageSize int, maps interface{}) ([]*SendReturn, error) {
 	var d []*SendReturn
-	err := db.Model(&SendReturn{}).Preload("Company").Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Find(&d).Error
+	err := db.Model(&SendReturn{}).Preload("Company").Preload("Product").Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Find(&d).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}

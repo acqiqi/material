@@ -7,6 +7,7 @@ import (
 	"material/lib/utils"
 	"material/models"
 	"material/service/product_service"
+	"material/service/send_service"
 )
 
 // 产品 材料列表
@@ -34,6 +35,54 @@ func ProductList(c *gin.Context) {
 		Lists: lists,
 		Total: models.ProductGetListsCount(utils.BuildWhere(maps)),
 		Map:   data.Map,
+	})
+}
+
+// 退货列表
+func ReturnProductList(c *gin.Context) {
+	user_info, _ := c.Get("user_info")
+	log.Print(user_info.(models.Users))
+	company, _ := c.Get("company")
+	log.Println(company.(models.CompanyUsers))
+
+	data := e.ApiPageLists{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+	e.CheckApiPageListDefault(&data) //处理页数据
+
+	maps := utils.WhereToMap(data.Map)
+	maps["company_id"] = company.(models.CompanyUsers).Company.Id
+	maps["flag"] = 1
+
+	lists, _ := send_service.ApiListsReturn(data.Page, data.Limit, utils.BuildWhere(maps))
+	e.ApiOk(c, "获取成功", e.ApiPageLists{
+		Page:  data.Page,
+		Limit: data.Limit,
+		Lists: lists,
+		Total: models.SendReturnGetListsCount(utils.BuildWhere(maps)),
+		Map:   data.Map,
+	})
+}
+
+func ProductInfo(c *gin.Context) {
+	data := e.ApiId{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	info, err := models.ProductGetInfo(data.Id)
+	if err != nil {
+		e.ApiErr(c, "产品不存在")
+		return
+	}
+
+	e.ApiOk(c, "获取成功", struct {
+		Info models.Product `json:"info"`
+	}{
+		Info: *info,
 	})
 }
 
