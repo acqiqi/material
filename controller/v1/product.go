@@ -28,6 +28,12 @@ func ProductList(c *gin.Context) {
 	maps["company_id"] = company.(models.CompanyUsers).Company.Id
 	maps["flag"] = 1
 
+	if data.OptParm["replenishment_flag"] != nil {
+		maps["replenishment_flag"] = 1
+	} else {
+		maps["replenishment_flag"] = 0
+	}
+
 	lists, _ := product_service.ApiLists(data.Page, data.Limit, utils.BuildWhere(maps))
 	e.ApiOk(c, "获取成功", e.ApiPageLists{
 		Page:  data.Page,
@@ -213,6 +219,7 @@ func ProductClassEdit(c *gin.Context) {
 	e.ApiOk(c, "编辑成功", p)
 }
 
+// 刪除Class
 func ProductClassDelete(c *gin.Context) {
 	data := struct {
 		Id int64 `json:"id"`

@@ -4,6 +4,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"log"
 	"material/lib/utils"
+	"time"
 )
 
 // 项目
@@ -84,6 +85,15 @@ func ProjectGetListsCount(maps interface{}) int {
 	var projects []*Project
 	count := 0
 	db.Preload("Company").Where(maps).Find(&projects).Count(&count)
+	return count
+}
+
+// 查询项目总数
+func ProjectGetCount(company_id int64, begin_time, end_time time.Time) int {
+	var projects []*Project
+	count := 0
+	db.Preload("Company").Where("company_id = ? AND created_at BETWEEN ? AND ?",
+		company_id, begin_time, end_time).Find(&projects).Count(&count)
 	return count
 }
 

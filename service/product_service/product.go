@@ -30,6 +30,9 @@ type MaterialAdd struct {
 	Company    models.Company  `gorm:"ForeignKey:CompanyId" json:"company"`
 	ContractId int64           `json:"contract_id"` //合同
 	Contract   models.Contract `gorm:"ForeignKey:ContractId" json:"contract"`
+
+	BeginTime utils.Time `json:"begin_time"` //同步開始時間
+
 }
 
 // 产品新增结构体
@@ -144,6 +147,7 @@ func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platfor
 		ProjectId:      project.Id,
 		CompanyId:      project.CompanyId,
 		ContractId:     m_data.ContractId, //合同id
+		BeginTime:      m_data.BeginTime,
 	}
 	models.MaterialAddT(&mm, &t)
 

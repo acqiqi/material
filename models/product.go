@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/jinzhu/gorm"
 	"material/lib/utils"
+	"time"
 )
 
 type Product struct {
@@ -47,8 +48,9 @@ type Product struct {
 	PlatformUid         string     `json:"platform_uid"` //平台uid
 	PlatformId          string     `json:"platform_id"`  //平台id
 
-	ContractId int64    `json:"contract_id"` //合同
-	Contract   Contract `gorm:"ForeignKey:ContractId" json:"contract"`
+	ContractId   int64    `json:"contract_id"` //合同
+	Contract     Contract `gorm:"ForeignKey:ContractId" json:"contract"`
+	SendReturnId int64    `json:"send_return_id"`
 
 	//UseNum float64 `json:"use_num"`
 }
@@ -131,6 +133,24 @@ func ProductGetListsCount(maps interface{}) int {
 	count := 0
 	db.Preload("Company").Where(maps).Find(&products).Count(&count)
 	return count
+}
+
+func ProductGetCount(company_id int64, begin_time, end_time time.Time) int {
+	var projects []*Product
+	count := 0
+	db.Preload("Company").Where("company_id = ? AND created_at BETWEEN ? AND ?",
+		company_id, begin_time, end_time).Find(&projects).Count(&count)
+	return count
+}
+
+func ProductGet() {
+	//rows := db.Table("vhake_product").Select("sum(count) as count").
+	//	Where("").Row()
+	//var count float64
+	//err := rows.Scan(&count)
+	//if err != nil {
+	//	//return 0, err
+	//}
 }
 
 // 获取材料select

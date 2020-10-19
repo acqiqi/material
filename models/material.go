@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/jinzhu/gorm"
 	"log"
+	"material/lib/utils"
 )
 
 // 材料单
@@ -26,6 +27,8 @@ type Material struct {
 	Company    Company  `gorm:"ForeignKey:CompanyId" json:"company"`
 	ContractId int64    `json:"contract_id"` //合同
 	Contract   Contract `gorm:"ForeignKey:ContractId" json:"contract"`
+
+	BeginTime utils.Time `json:"begin_time"` //同步開始時間
 }
 
 // 三方检测是否存在

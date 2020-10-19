@@ -165,3 +165,122 @@ func SendReturnInfo(c *gin.Context) {
 		Info: *info,
 	})
 }
+
+// 接收退貨
+func SendReturnUse(c *gin.Context) {
+	data := e.ApiId{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	info, err := models.SendReturnGetInfo(data.Id)
+	if err != nil {
+		e.ApiErr(c, "产品不存在")
+		return
+	}
+
+	//查询是否有自己权限
+	company, _ := c.Get("company")
+	if info.CompanyId != company.(models.CompanyUsers).Company.Id {
+		e.ApiErr(c, "非法请求")
+		return
+	}
+	if info.Status == 1 {
+		e.ApiErr(c, "已经接收，请勿重复接收")
+		return
+	}
+
+	err = models.SendReturnEdit(info.Id, map[string]interface{}{
+		"status": 1,
+	})
+	if err != nil {
+		e.ApiErr(c, "操作失败")
+		return
+	}
+	e.ApiOk(c, "接收成功", e.GetEmptyStruct())
+}
+
+// 补货
+func SendReturnReplenish(c *gin.Context) {
+	data := e.ApiId{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	info, err := models.SendReturnGetInfo(data.Id)
+	if err != nil {
+		e.ApiErr(c, "产品不存在")
+		return
+	}
+
+	//查询是否有自己权限
+	company, _ := c.Get("company")
+	if info.CompanyId != company.(models.CompanyUsers).Company.Id {
+		e.ApiErr(c, "非法请求")
+		return
+	}
+	if info.Status != 1 {
+		e.ApiErr(c, "未接收，无法补货")
+		return
+	}
+
+	if info.IsReplenish == 1 {
+		e.ApiErr(c, "已经补货，请勿重复补货")
+		return
+	}
+
+	//创建补货
+	m := models.Product{
+		MaterialName:        info.Product.MaterialName + "- 补货",
+		BlankingAttachment:  info.Product.BlankingAttachment,
+		Attachment:          info.Product.Attachment,
+		InstallMap:          info.Product.InstallMap,
+		Price:               info.Product.Price,
+		Count:               info.Count, //补货数量
+		ContractCount:       info.Count,
+		PackCount:           0,
+		SendCount:           0,
+		ReturnCount:         0,
+		ReceiveCount:        0,
+		Unit:                info.Product.Unit,
+		ProjectId:           info.Product.ProjectId,
+		ProjectName:         info.Product.ProjectName,
+		ReplenishmentFlag:   1, //是否补货
+		ProductSubFlag:      0,
+		ConfigData:          info.Product.ConfigData,
+		AppendAttachment:    info.Product.AppendAttachment,
+		ProjectMaterialId:   info.Product.ProjectMaterialId,
+		AdminMaterialInfoId: info.Product.AdminMaterialInfoId,
+		ProjectAdditional:   info.Product.ProjectAdditional,
+		Remark:              info.Product.Remark,
+		Length:              info.Product.Length,
+		Width:               info.Product.Width,
+		Height:              info.Product.Height,
+		Location:            info.Product.Location,
+		Standard:            info.Product.Standard,
+		ArriveDate:          info.Product.ArriveDate,
+		Cuid:                info.Product.Cuid,
+		CompanyId:           info.Product.CompanyId,
+		Company:             info.Product.Company,
+		SupplyCycle:         info.Product.SupplyCycle,
+		MaterialId:          info.Product.MaterialId,
+		PlatformKey:         info.Product.PlatformKey,
+		PlatformUid:         info.Product.PlatformUid,
+		PlatformId:          info.Product.PlatformId,
+		ContractId:          info.Product.ContractId,
+		SendReturnId:        info.Id,
+	}
+	models.ProductAdd(&m)
+	err = models.SendReturnEdit(info.Id, map[string]interface{}{
+		"status":       1,
+		"replenish_id": m.Id,
+		"is_replenish": 1,
+	})
+	if err != nil {
+		e.ApiErr(c, "操作失败")
+		return
+	}
+	e.ApiOk(c, "补货成功", e.GetEmptyStruct())
+}

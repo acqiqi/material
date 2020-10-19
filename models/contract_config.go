@@ -43,7 +43,7 @@ func ContractConfigEdit(id int64, data interface{}) error {
 // 获取合同付款方式详情
 func ContractConfigGetInfo(id int64) (*ContractConfig, error) {
 	var cc ContractConfig
-	err := db.Where("company_id = ? AND flag =1", id).Preload("Company").First(&cc).Error
+	err := db.Where("contract_id = ? AND flag =1", id).First(&cc).Error
 	if err != nil {
 		return &ContractConfig{}, err
 	}

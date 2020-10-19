@@ -107,3 +107,31 @@ func ContractList(c *gin.Context) {
 		Map:   data.Map,
 	})
 }
+
+func ContractInfo(c *gin.Context) {
+	data := e.ApiId{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	contract, err := models.ContractInfo(data.Id)
+	if err != nil {
+		e.ApiErr(c, "合同不存在")
+		return
+	}
+
+	//查詢合同配置
+	cc, err := models.ContractConfigGetInfo(data.Id)
+	if err != nil {
+		e.ApiErr(c, "配置查詢有誤")
+		return
+	}
+	e.ApiOk(c, "获取成功", struct {
+		Info   models.Contract       `json:"info"`
+		Config models.ContractConfig `json:"config"`
+	}{
+		Info:   *contract,
+		Config: *cc,
+	})
+}

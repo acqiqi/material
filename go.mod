@@ -19,5 +19,5 @@ require (
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/tealeg/xlsx v1.0.5 // indirect
 	github.com/unknwon/com v1.0.1
-	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
+	github.com/unrolled/secure v1.0.8
 )

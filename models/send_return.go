@@ -23,6 +23,9 @@ type SendReturn struct {
 
 	CompanyId int64    `json:"company_id"`
 	Company   Contract `gorm:"ForeignKey:CompanyId" json:"company"`
+
+	ReplenishId int64 `json:"replenish_id"` //补货id productid
+	IsReplenish int64 `json:"is_replenish"` //是否补货
 }
 
 // 退货详情

@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/jinzhu/gorm"
 	"material/lib/utils"
+	"time"
 )
 
 type Pr struct {
@@ -82,4 +83,24 @@ func PrGetSelect(maps string) ([]*Pr, error) {
 		return nil, err
 	}
 	return pr, nil
+}
+
+func PrGetCount(company_id int64, begin_time, end_time time.Time) int {
+	var projects []*Pr
+	count := 0
+	db.Preload("Company").Where("company_id = ? AND created_at BETWEEN ? AND ?",
+		company_id, begin_time, end_time).Find(&projects).Count(&count)
+	return count
+}
+
+func PrGetSum(company_id int64, begin_time, end_time time.Time) float64 {
+	rows := db.Table("vhake_pr").Select("sum(price) as count").
+		Where("").Row()
+	var count float64
+	err := rows.Scan(&count)
+	if err != nil {
+		//return 0, err
+		return 0
+	}
+	return count
 }

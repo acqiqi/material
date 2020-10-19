@@ -7,7 +7,6 @@ import (
 	"material/lib/gredis"
 	"material/lib/logging"
 	"material/lib/setting"
-	"material/lib/utils"
 	"material/models"
 	"material/router"
 	"net/http"
@@ -22,7 +21,8 @@ func init() {
 	logging.Setup() //日志
 	gredis.Setup()  // redis
 	//utils.InitModel()
-	utils.PDFT()
+	//utils.PDFT()
+
 }
 
 func main() {

@@ -118,11 +118,29 @@ func ProjectSelect(c *gin.Context) {
 	return
 }
 
+func ProjectInfo(c *gin.Context) {
+	data := e.ApiId{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	project, err := models.ProjectGetInfo(data.Id)
+	if err != nil {
+		e.ApiErr(c, "项目不存在")
+		return
+	}
+
+	e.ApiOk(c, "获取成功", struct {
+		Info models.Project `json:"info"`
+	}{
+		Info: *project,
+	})
+}
+
 //接收项目
 func ProjectReceive(c *gin.Context) {
-	data := struct {
-		Id int64 `json:"id"`
-	}{}
+	data := e.ApiId{}
 	if err := c.BindJSON(&data); err != nil {
 		e.ApiErr(c, err.Error())
 		return

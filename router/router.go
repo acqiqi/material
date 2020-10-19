@@ -5,6 +5,7 @@ import (
 	platform_v1 "material/controller/platform/v1"
 	small_v1 "material/controller/small/v1"
 	v1 "material/controller/v1"
+	"material/lib/setting"
 	"material/middleware/app_middleware"
 	"material/middleware/company"
 	"material/middleware/platform"
@@ -14,6 +15,8 @@ import (
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 
+	"fmt"
+	"github.com/unrolled/secure"
 	"material/lib/export"
 	"material/lib/qrcode"
 	"material/middleware/jwt"
@@ -22,6 +25,10 @@ import (
 // InitRouter initialize routing information
 func InitRouter() *gin.Engine {
 	r := gin.New()
+
+	//r.Use(TlsHandler())
+	//r.RunTLS(fmt.Sprintf(":%d", setting.ServerSetting.HttpsPort), setting.ServerSetting.CertFile, setting.ServerSetting.KeyFile)
+
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 
@@ -30,6 +37,7 @@ func InitRouter() *gin.Engine {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Use(app_middleware.App())
+
 	//注册AuthRouter
 	setAuthRouter(r)
 	// 接口主节点
@@ -42,18 +50,23 @@ func InitRouter() *gin.Engine {
 		apiv2 := apiv1.Group("/company")
 		apiv2.Use(company.Company())
 		{
+			// 控制台
+			apiv2.POST("/dashboard_home", v1.DashboardHome) //控制台首页
+
 			// 项目
 			apiv2.POST("/project_list", v1.ProjectList)       //获取项目列表
 			apiv2.POST("/project_create", v1.ProjectCreate)   //创建项
 			apiv2.POST("/project_edit", v1.ProjectEdit)       //编辑项目
 			apiv2.POST("/project_select", v1.ProjectSelect)   //获取Select
 			apiv2.POST("/project_receive", v1.ProjectReceive) //接收项目
+			apiv2.POST("/project_info", v1.ProjectInfo)       //项目详情
 
 			// 合同
 			apiv2.POST("/contract_create", v1.ContractCreate) //创建合同
 			apiv2.POST("/contract_edit", v1.ContractEdit)     //编辑合同
 			apiv2.POST("/contract_list", v1.ContractList)     //合同列表
 			apiv2.POST("/contract_select", v1.ContractSelect) //合同select
+			apiv2.POST("/contract_info", v1.ContractInfo)     //合同详情
 
 			//产品 材料
 			apiv2.POST("/product_class_list", v1.ProductClassList)     //材料类型列表
@@ -80,10 +93,12 @@ func InitRouter() *gin.Engine {
 			apiv2.POST("/packing_look_qrcode", v1.PackingLookQrcode) //查看二维码
 
 			//发货相关
-			apiv2.POST("/send_create", v1.SendCreate)          //发货
-			apiv2.POST("/send_list", v1.SendList)              //发货列表
-			apiv2.POST("/send_look_qrcode", v1.SendLookQrcode) //发货列表
-			apiv2.POST("/send_return_info", v1.SendReturnInfo) //退货详情
+			apiv2.POST("/send_create", v1.SendCreate)                    //发货
+			apiv2.POST("/send_list", v1.SendList)                        //发货列表
+			apiv2.POST("/send_look_qrcode", v1.SendLookQrcode)           //发货列表
+			apiv2.POST("/send_return_info", v1.SendReturnInfo)           //退货详情
+			apiv2.POST("/send_return_use", v1.SendReturnUse)             //接收退货
+			apiv2.POST("/send_return_replenish", v1.SendReturnReplenish) //补货
 
 			// 请款相关
 			apiv2.POST("/pr_type_select", v1.PrTypeSelect) //获取请款type
@@ -128,4 +143,21 @@ func InitRouter() *gin.Engine {
 
 	}
 	return r
+}
+
+func TlsHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		secureMiddleware := secure.New(secure.Options{
+			SSLRedirect: true,
+			SSLHost:     "localhost:" + fmt.Sprintf(":%d", setting.ServerSetting.HttpPort),
+		})
+		err := secureMiddleware.Process(c.Writer, c.Request)
+
+		// If there was an error, do not continue.
+		if err != nil {
+			return
+		}
+
+		c.Next()
+	}
 }
