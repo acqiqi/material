@@ -26,6 +26,7 @@ func init() {
 }
 
 func main() {
+
 	gin.SetMode(setting.ServerSetting.RunMode)
 
 	routersInit := router.InitRouter()

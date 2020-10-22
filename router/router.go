@@ -51,7 +51,8 @@ func InitRouter() *gin.Engine {
 		apiv2.Use(company.Company())
 		{
 			// 控制台
-			apiv2.POST("/dashboard_home", v1.DashboardHome) //控制台首页
+			apiv2.POST("/dashboard_home", v1.DashboardHome)       //控制台首页
+			apiv2.POST("/dashboard_account", v1.DashboardAccount) //控制台首页
 
 			// 项目
 			apiv2.POST("/project_list", v1.ProjectList)       //获取项目列表

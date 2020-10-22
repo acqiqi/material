@@ -48,9 +48,10 @@ type Product struct {
 	PlatformUid         string     `json:"platform_uid"` //平台uid
 	PlatformId          string     `json:"platform_id"`  //平台id
 
-	ContractId   int64    `json:"contract_id"` //合同
-	Contract     Contract `gorm:"ForeignKey:ContractId" json:"contract"`
-	SendReturnId int64    `json:"send_return_id"`
+	ContractId     int64            `json:"contract_id"` //合同
+	Contract       Contract         `gorm:"ForeignKey:ContractId" json:"contract"`
+	SendReturnId   int64            `json:"send_return_id"`
+	PackingProduct []PackingProduct `gorm:"ForeignKey:product_id" json:"packing_product"`
 
 	//UseNum float64 `json:"use_num"`
 }
@@ -121,6 +122,15 @@ func ProductGetInfoT(id int64, t *gorm.DB) (*Product, error) {
 func ProductGetLists(pageNum int, pageSize int, maps interface{}) ([]*Product, error) {
 	var products []*Product
 	err := db.Model(&Product{}).Preload("Contract").Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Find(&products).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	return products, nil
+}
+
+func ProductGetAccountList(project_id int64) ([]*Product, error) {
+	var products []*Product
+	err := db.Model(&Product{}).Preload("PackingProduct").Where("project_id = ?", project_id).Order("id desc").Find(&products).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}

@@ -6,6 +6,7 @@ import (
 	"material/lib/utils"
 	"material/models"
 	"material/service/send_service"
+	"time"
 )
 
 func SendInfo(c *gin.Context) {
@@ -165,6 +166,8 @@ func SendReceiver(c *gin.Context) {
 				tpl_packing_num = tpl_packing_num + tpl_pp_num
 				models.PackingProductEditT(pp.Id, map[string]interface{}{
 					"receive_count": tpl_pp_num,
+					"is_receive":    1,
+					"receive_time":  time.Now(),
 				}, &t)
 				// 编辑产品
 				product, err := models.ProductGetInfoT(pp.Product.Id, &t)

@@ -1,0 +1,76 @@
+{
+  "useApiMock": true,
+  "apiMockConfig": {
+    "globalOpen": true,
+    "rules": [
+      {
+        "ruleId": "ab85199e-7ff3-41ee-9708-28ae986dbc07",
+        "ruleName": "未命名规则1",
+        "apiName": "downloadFile",
+        "enable": true,
+        "verifyFail": false,
+        "filterList": [
+          {
+            "propName": "f",
+            "propRegString": "",
+            "filterId": "fbc83242-dd2f-4af9-bd9d-cdb47eb07fcc"
+          }
+        ],
+        "returnConfig": {
+          "returnType": "succ",
+          "generateType": "manual",
+          "manual": {
+            "succ": {
+              "resStr": "{\n  \"tempFilePath\": \"\",\n  \"filePath\": \"\",\n  \"statusCode\": \"\"\n}"
+            },
+            "fail": {
+              "resStr": "{\n  \"errMsg\": \"downloadFile:fail 填写错误信息\"\n}"
+            }
+          },
+          "template": {
+            "succ": {
+              "templateStr": "{\n  \"tempFilePath\": \"\",\n  \"filePath\": \"\",\n  \"statusCode\": \"\"\n}"
+            },
+            "fail": {
+              "templateStr": "{\n  \"errMsg\": \"downloadFile:fail 填写错误信息\"\n}"
+            }
+          }
+        }
+      },
+      {
+        "ruleId": "a743d1ac-8f1a-40c5-8264-54516ac28b84",
+        "ruleName": "未命名规则",
+        "apiName": "requestPayment",
+        "enable": true,
+        "verifyFail": false,
+        "filterList": [
+          {
+            "propName": "url",
+            "propRegString": "",
+            "filterId": "9028dcac-908f-4df1-b8bf-bb94169fc9eb"
+          }
+        ],
+        "returnConfig": {
+          "returnType": "succ",
+          "generateType": "manual",
+          "manual": {
+            "succ": {
+              "resStr": "{}"
+            },
+            "fail": {
+              "resStr": "{\n  \"errMsg\": \"requestPayment:fail 填写错误信息\"\n}"
+            }
+          },
+          "template": {
+            "succ": {
+              "templateStr": "{}"
+            },
+            "fail": {
+              "templateStr": "{\n  \"errMsg\": \"requestPayment:fail 填写错误信息\"\n}"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -235,8 +235,9 @@ func QrcodeBuild(packing models.Packing) (string, error) {
 	}
 	// 获取二维码
 	wechatUtils := new(utils.WechatUtils)
-	wechatUtils.SmallQrcodeData.Path = "pages/packing/packing?id=" + strconv.FormatInt(packing.Id, 10)
+	wechatUtils.SmallQrcodeData.Page = "pages/packing/packing"
 	wechatUtils.SmallQrcodeData.Width = 430
+	wechatUtils.SmallQrcodeData.Scene = strconv.FormatInt(packing.Id, 10)
 	wechatUtils.Init(setting.WechatSetting.SmallAppID, setting.WechatSetting.AppSecret)
 	wechatUtils.GetAccessToken()
 	b, err := wechatUtils.GetSmallQrcode()
@@ -263,7 +264,7 @@ func QrcodeBuild(packing models.Packing) (string, error) {
 		fmt.Sprintf("项目名称：%s \n\r包装名称：%s \n\r",
 			packing.Project.ProjectName,
 			packing.PackingName), "", "Left", false)
-	fileStr := setting.AppSetting.StaticUrl + "static/pdf/" + strconv.FormatInt(packing.Id, 10) + ".pdf"
+	fileStr := setting.AppSetting.StaticUrl + "pdf/" + strconv.FormatInt(packing.Id, 10) + ".pdf"
 	err = pdf.OutputFileAndClose("static/pdf/" + strconv.FormatInt(packing.Id, 10) + ".pdf")
 	if err != nil {
 		return "", err
