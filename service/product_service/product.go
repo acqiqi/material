@@ -121,13 +121,13 @@ func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platfor
 		return nil, errors.New("非法请求")
 	}
 	//查询合同
-	contract, err := models.ContractInfo(m_data.ContractId)
-	if err != nil {
-		return nil, errors.New("合同查询有误")
-	}
-	if contract.ProjectId != project.Id {
-		return nil, errors.New("合同和项目不对应")
-	}
+	//contract, err := models.ContractInfo(m_data.ContractId)
+	//if err != nil {
+	//	return nil, errors.New("合同查询有误")
+	//}
+	//if contract.ProjectId != project.Id {
+	//	return nil, errors.New("合同和项目不对应")
+	//}
 
 	// 创建
 	t := *models.NewTransaction()
@@ -175,53 +175,72 @@ func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platfor
 			data[i].ProjectId = project.Id
 			data[i].ProjectName = project.ProjectName
 			data[i].CompanyId = project.CompanyId
-			// 处理新增数据结构
 
-			product_model := models.Product{
-				Model:              models.Model{},
-				MaterialName:       data[i].MaterialName,
-				BlankingAttachment: data[i].BlankingAttachment,
-				Attachment:         data[i].Attachment,
-				InstallMap:         data[i].InstallMap,
-				Price:              data[i].Price,
-				Count:              data[i].Count,
-				ContractCount:      data[i].ContractCount,
-				PackCount:          0,
-				SendCount:          0,
-				ReturnCount:        0,
-				ReceiveCount:       0,
-				Unit:               data[i].Unit,
-				ProjectId:          project.Id,
-				ProjectName:        project.ProjectName,
-				ReplenishmentFlag:  0,
-				ProductSubFlag:     0,
-				ConfigData:         "[]",
-				AppendAttachment:   data[i].AppendAttachment,
-				//ProjectMaterialId:   data[i].ProjectMaterialId,
-				AdminMaterialInfoId: 0,
-				ProjectAdditional:   data[i].ProjectAdditional,
-				Remark:              data[i].Remark,
-				Length:              data[i].Length,
-				Width:               data[i].Width,
-				Height:              data[i].Height,
-				Location:            data[i].Location,
-				Standard:            data[i].Standard,
-				ArriveDate:          data[i].ArriveDate,
-				Cuid:                0,
-				CompanyId:           project.CompanyId,
-				Company:             models.Company{},
-				SupplyCycle:         data[i].SupplyCycle,
-				MaterialId:          mm.Id,
-				PlatformKey:         platform.PlatformKey,
-				PlatformUid:         mm.PlatformUid,
-				PlatformId:          data[i].PlatformId,
-				ContractId:          mm.ContractId,
-			}
-			err := models.ProductAddT(&product_model, &t)
+			//判断产品是否存在
+			p_item, err := models.ProductCheckInfo(data[i].MaterialName, data[i].Standard, project.Id)
+			productModel := models.Product{}
 			if err != nil {
-				t.Rollback()
-				return nil, err
+				// 处理新增数据结构
+				productModel = models.Product{
+					Model:              models.Model{},
+					MaterialName:       data[i].MaterialName,
+					BlankingAttachment: data[i].BlankingAttachment,
+					Attachment:         data[i].Attachment,
+					InstallMap:         data[i].InstallMap,
+					Price:              data[i].Price,
+					Count:              data[i].Count,
+					ContractCount:      data[i].ContractCount,
+					PackCount:          0,
+					SendCount:          0,
+					ReturnCount:        0,
+					ReceiveCount:       0,
+					Unit:               data[i].Unit,
+					ProjectId:          project.Id,
+					ProjectName:        project.ProjectName,
+					ReplenishmentFlag:  0,
+					ProductSubFlag:     0,
+					ConfigData:         "[]",
+					AppendAttachment:   data[i].AppendAttachment,
+					//ProjectMaterialId:   data[i].ProjectMaterialId,
+					AdminMaterialInfoId: 0,
+					ProjectAdditional:   data[i].ProjectAdditional,
+					Remark:              data[i].Remark,
+					Length:              data[i].Length,
+					Width:               data[i].Width,
+					Height:              data[i].Height,
+					Location:            data[i].Location,
+					Standard:            data[i].Standard,
+					ArriveDate:          data[i].ArriveDate,
+					Cuid:                0,
+					CompanyId:           project.CompanyId,
+					SupplyCycle:         data[i].SupplyCycle,
+					MaterialId:          mm.Id,
+					PlatformKey:         platform.PlatformKey,
+					PlatformUid:         mm.PlatformUid,
+					PlatformId:          data[i].PlatformId,
+					ContractId:          mm.ContractId,
+				}
+				err = models.ProductAddT(&productModel, &t)
+				if err != nil {
+					t.Rollback()
+					return nil, err
+				}
+			} else {
+				productModel = *p_item
+				models.ProductEditT(productModel.Id, map[string]interface{}{
+					"count": productModel.Count + data[i].Count,
+					"price": data[i].Price,
+				}, &t)
 			}
+			ml := models.MaterialLink{
+				MaterialId: mm.Id,
+				ProductId:  productModel.Id,
+				CompanyId:  project.CompanyId,
+				Count:      data[i].Count,
+				ProjectId:  project.Id,
+				Price:      data[i].Price,
+			}
+			models.MaterialLinkAddT(&ml, &t)
 		}
 	} else {
 		// 材料没有的情况
@@ -342,6 +361,12 @@ func Edit(data *ProductAdd) (*models.Product, error) {
 	}
 
 	return &model, nil
+}
+
+// 下料单列表
+func MaterialApiLists(page int, limit int, maps string) ([]*models.Material, error) {
+	offset := (page - 1) * limit
+	return models.MaterialGetLists(offset, limit, maps)
 }
 
 // 获取Api列表

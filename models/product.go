@@ -109,6 +109,17 @@ func ProductGetInfo(id int64) (*Product, error) {
 	return &project, nil
 }
 
+// 产品检测在当前项目下是否存在
+func ProductCheckInfo(material_name, standard string, project_id int64) (*Product, error) {
+	var project Product
+	err := db.Where("material_name = ? AND standard = ? AND project_id = ? AND flag =1", material_name, standard, project_id).
+		Preload("Company").Preload("Project").First(&project).Error
+	if err != nil {
+		return &Product{}, err
+	}
+	return &project, nil
+}
+
 func ProductGetInfoT(id int64, t *gorm.DB) (*Product, error) {
 	var project Product
 	err := t.Where("id = ? AND flag =1", id).Preload("Company").Preload("Project").First(&project).Error

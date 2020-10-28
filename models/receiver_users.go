@@ -18,9 +18,9 @@ type ReceiverUsers struct {
 }
 
 // 收货人详情 平台查询 不检测cuid
-func ReceiverUsersGetInfoByPlatform(platform_key, platform_uid string) (*ReceiverUsers, error) {
+func ReceiverUsersGetInfoByPlatform(platform_key, platform_uid, project_id string) (*ReceiverUsers, error) {
 	var d ReceiverUsers
-	err := db.Where("platform_key = ? AND platform_uid = ? AND flag = 1", platform_key, platform_uid).Preload("Users").First(&d).Error
+	err := db.Where("platform_key = ? AND platform_uid = ? AND project_id AND flag = 1", platform_key, platform_uid, project_id).Preload("Users").First(&d).Error
 	if err != nil {
 		return &ReceiverUsers{}, err
 	}

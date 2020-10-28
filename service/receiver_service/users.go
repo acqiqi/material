@@ -56,21 +56,19 @@ func SyncUsers(users []UserAdd, project *models.Project, platform_key string) ([
 				}
 			}
 			// 查询是否在项目中注册
-			user, err := models.ReceiverUsersGetInfoByPlatform(platform_key, v.PlatformUid)
+			//user, err := models.ReceiverUsersGetInfoByPlatform(platform_key, v.PlatformUid)
+			//直接注册 奥利给
+			user, err := MobileReg(models.ReceiverUsers{
+				CompanyId:   project.CompanyId,
+				ProjectId:   project.Id,
+				Cuid:        cloud_user.Data.UserInfo.Id,
+				PlatformKey: platform_key,
+				PlatformUid: v.PlatformUid,
+				Nickname:    v.Nickname,
+				Mobile:      v.Mobile,
+			})
 			if err != nil {
-				//直接注册 奥利给
-				user, err = MobileReg(models.ReceiverUsers{
-					CompanyId:   project.CompanyId,
-					ProjectId:   project.Id,
-					Cuid:        cloud_user.Data.UserInfo.Id,
-					PlatformKey: platform_key,
-					PlatformUid: v.PlatformUid,
-					Nickname:    v.Nickname,
-					Mobile:      v.Mobile,
-				})
-				if err != nil {
-					continue //直接跳出业务不成立
-				}
+				continue //直接跳出业务不成立
 			}
 			//查询本地是否注册
 			_, err = models.GetUsersInfoCuid(cloud_user.Data.UserInfo.Id)

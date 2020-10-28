@@ -208,3 +208,30 @@ func PackingLookQrcode(c *gin.Context) {
 		})
 	}
 }
+
+// 打包详情
+func PackingInfo(c *gin.Context) {
+	data := e.ApiId{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	info, err := models.PackingGetInfo(data.Id)
+	if err != nil {
+		e.ApiErr(c, "下料单不存在")
+		return
+	}
+
+	ps, err := models.PackingProductGetLists(0, 999999, utils.BuildWhere(map[string]interface{}{
+		"packing_id": info.Id,
+	}))
+
+	e.ApiOk(c, "获取成功", struct {
+		Info     models.Packing `json:"info"`
+		Products interface{}    `json:"products"`
+	}{
+		Info:     *info,
+		Products: ps,
+	})
+}

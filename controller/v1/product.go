@@ -10,6 +10,61 @@ import (
 	"material/service/send_service"
 )
 
+// 下料单列表
+func MaterialList(c *gin.Context) {
+	user_info, _ := c.Get("user_info")
+	log.Print(user_info.(models.Users))
+	company, _ := c.Get("company")
+	log.Println(company.(models.CompanyUsers))
+
+	data := e.ApiPageLists{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+	e.CheckApiPageListDefault(&data) //处理页数据
+
+	maps := utils.WhereToMap(data.Map)
+	maps["company_id"] = company.(models.CompanyUsers).Company.Id
+	maps["flag"] = 1
+
+	lists, _ := product_service.MaterialApiLists(data.Page, data.Limit, utils.BuildWhere(maps))
+	e.ApiOk(c, "获取成功", e.ApiPageLists{
+		Page:  data.Page,
+		Limit: data.Limit,
+		Lists: lists,
+		Total: models.MaterialGetListsCount(utils.BuildWhere(maps)),
+		Map:   data.Map,
+	})
+}
+
+// 下料单详情
+func MaterialInfo(c *gin.Context) {
+	data := e.ApiId{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	info, err := models.MaterialGetInfo(data.Id)
+	if err != nil {
+		e.ApiErr(c, "下料单不存在")
+		return
+	}
+
+	ps, err := models.MaterialLinkGetAllLists(utils.BuildWhere(map[string]interface{}{
+		"material_id": info.Id,
+	}))
+
+	e.ApiOk(c, "获取成功", struct {
+		Info     models.Material `json:"info"`
+		Products interface{}     `json:"products"`
+	}{
+		Info:     *info,
+		Products: ps,
+	})
+}
+
 // 产品 材料列表
 func ProductList(c *gin.Context) {
 	user_info, _ := c.Get("user_info")

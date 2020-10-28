@@ -51,3 +51,31 @@ func MaterialAddT(material *Material, t *gorm.DB) error {
 	}
 	return nil
 }
+
+// 材料详情
+func MaterialGetInfo(id int64) (*Material, error) {
+	var project Material
+	err := db.Where("id = ? AND flag =1", id).Preload("Project").First(&project).Error
+	if err != nil {
+		return &Material{}, err
+	}
+	return &project, nil
+}
+
+// 获取下料单列表
+func MaterialGetLists(pageNum int, pageSize int, maps interface{}) ([]*Material, error) {
+	var products []*Material
+	err := db.Model(&Material{}).Preload("Project").Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Find(&products).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	return products, nil
+}
+
+// 下料单Count
+func MaterialGetListsCount(maps interface{}) int {
+	var products []*Material
+	count := 0
+	db.Preload("Project").Where(maps).Find(&products).Count(&count)
+	return count
+}

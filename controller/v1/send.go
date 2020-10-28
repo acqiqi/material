@@ -42,6 +42,32 @@ func SendList(c *gin.Context) {
 	})
 }
 
+func SendInfo(c *gin.Context) {
+	data := e.ApiId{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	info, err := models.SendGetInfo(data.Id)
+	if err != nil {
+		e.ApiErr(c, "下料单不存在")
+		return
+	}
+
+	ps, err := models.PackingProductGetLists(0, 9999, utils.BuildWhere(map[string]interface{}{
+		"send_id": info.Id,
+	}))
+
+	e.ApiOk(c, "获取成功", struct {
+		Info  models.Send `json:"info"`
+		Table interface{} `json:"table"`
+	}{
+		Info:  *info,
+		Table: ps,
+	})
+}
+
 func SendCreate(c *gin.Context) {
 	data := struct {
 		Send  send_service.SendAdd `json:"send"`
