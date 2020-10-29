@@ -12,6 +12,9 @@ type PlatformCompany struct {
 	PlatformKey string  `json:"platform_key"` // 平台key
 	PlatformUid string  `json:"platform_uid"` // 平台用户id
 	CompanyKey  string  `json:"company_key"`
+	DataOrigin  string  `json:"data_origin"`
+	Opt         string  `json:"opt"`
+	SupplierId  string  `json:"supplier_id"`
 }
 
 func PlatformCompanyGetLists(maps string) ([]*PlatformCompany, error) {
@@ -26,6 +29,15 @@ func PlatformCompanyGetLists(maps string) ([]*PlatformCompany, error) {
 func PlatformCompanyGetInfo(id int64) (*PlatformCompany, error) {
 	var pc PlatformCompany
 	err := db.Where("id = ? AND flag =1", id).Preload("Company").First(&pc).Error
+	if err != nil {
+		return &PlatformCompany{}, err
+	}
+	return &pc, nil
+}
+
+func PlatformCompanyGetInfoCheck(company_id int64, platform_key string) (*PlatformCompany, error) {
+	var pc PlatformCompany
+	err := db.Where("company_id = ? AND platform_key= ?  AND flag =1", company_id, platform_key).Preload("Company").First(&pc).Error
 	if err != nil {
 		return &PlatformCompany{}, err
 	}

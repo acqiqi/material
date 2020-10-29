@@ -55,8 +55,9 @@ func SendInfo(c *gin.Context) {
 		return
 	}
 
-	ps, err := models.PackingProductGetLists(0, 9999, utils.BuildWhere(map[string]interface{}{
+	ps, err := models.PackingGetLists(0, 9999, utils.BuildWhere(map[string]interface{}{
 		"send_id": info.Id,
+		"flag":    1,
 	}))
 
 	e.ApiOk(c, "获取成功", struct {

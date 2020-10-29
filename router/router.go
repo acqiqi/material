@@ -100,6 +100,7 @@ func InitRouter() *gin.Engine {
 			//发货相关
 			apiv2.POST("/send_create", v1.SendCreate)                    //发货
 			apiv2.POST("/send_list", v1.SendList)                        //发货列表
+			apiv2.POST("/send_info", v1.SendInfo)                        //发货列表
 			apiv2.POST("/send_look_qrcode", v1.SendLookQrcode)           //发货列表
 			apiv2.POST("/send_return_info", v1.SendReturnInfo)           //退货详情
 			apiv2.POST("/send_return_use", v1.SendReturnUse)             //接收退货

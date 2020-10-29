@@ -43,6 +43,7 @@ func DashboardHome(c *gin.Context) {
 
 		"pr_count": pr_count,
 		"pr_price": pr_price,
+		"company":  company,
 	})
 }
 

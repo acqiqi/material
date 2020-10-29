@@ -11,7 +11,7 @@ const (
 
 // 项目接收回调结构体
 type PlatformProjectReceiveCallback struct {
-	Id          int64          `json:"id"`
+	Id          string         `json:"project_id"`
 	ProjectName string         `json:"project_name"` // 项目名称
 	State       int            `json:"state"`        // 0 在建中 1已完成
 	CompanyId   int64          `json:"company_id"`   //关联企业
@@ -22,6 +22,7 @@ type PlatformProjectReceiveCallback struct {
 	PlatformId  string         `json:"platform_id"`  // 平台用户id
 	CreatedAt   utils.Time     `json:"created_at"`
 	Status      int            `json:"status"` // 0未同步 1已同步
+	SupplierId  string         `json:"supplier_id"`
 }
 
 type PlatformPRCreateCallback struct {

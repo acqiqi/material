@@ -33,7 +33,7 @@ func GetAccessToken(c *gin.Context) {
 	}
 
 	token := uuid.NewV4().String()
-	gredis.SetCacheString("PLATFORM"+token, platform.PlatformKey, 7800)
+	gredis.SetCacheString("PLATFORM"+token, platform.PlatformKey, 7800000000)
 
 	e.ApiOk(c, "登录成功", struct {
 		Token string `json:"token"`

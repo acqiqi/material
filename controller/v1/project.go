@@ -7,6 +7,7 @@ import (
 	"material/lib/utils"
 	"material/models"
 	"material/service/project_service"
+	"strconv"
 	"time"
 )
 
@@ -175,6 +176,8 @@ func ProjectReceive(c *gin.Context) {
 		return
 	}
 
+	company_link, err := models.PlatformCompanyGetInfoCheck(company.(models.CompanyUsers).Company.Id, project.PlatformKey)
+
 	//查询Platform
 	platform, err := models.PlatformGetInfoOrKey(project.PlatformKey)
 	if err == nil {
@@ -183,7 +186,7 @@ func ProjectReceive(c *gin.Context) {
 			Msg:    "Receive Success",
 			Action: e.PLATFORM_ACTION_PROJECT_RECEIVE, //接收
 			Data: e.PlatformProjectReceiveCallback{
-				Id:          project.Id,
+				Id:          strconv.FormatInt(project.Id, 10),
 				ProjectName: project.ProjectName,
 				State:       project.State,
 				CompanyId:   project.CompanyId,
@@ -194,10 +197,13 @@ func ProjectReceive(c *gin.Context) {
 				PlatformId:  project.PlatformId,
 				CreatedAt:   project.CreatedAt,
 				Status:      1,
+				SupplierId:  company_link.SupplierId,
 			},
 		}
 		cb_url := platform.MessageCallbackUrl
-		log.Println(utils.JsonEncode(callback))
+		cb_str := utils.JsonEncode(callback)
+		log.Println(cb_str)
+
 		c_data := new(e.HttpCallbackData)
 		err = utils.HttpPostJson(cb_url, callback, &c_data)
 		if err != nil {

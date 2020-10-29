@@ -28,6 +28,9 @@ func CompanyBindLink(c *gin.Context) {
 	data := struct {
 		PlatformUid string `json:"platform_uid"`
 		CompanyKey  string `json:"company_key"`
+		DataOrigin  string `json:"data_origin"`
+		SupplierId  string `json:"supplier_id"`
+		Opt         string `json:"opt"`
 	}{}
 	if err := c.BindJSON(&data); err != nil {
 		e.ApiErr(c, err.Error())
@@ -54,6 +57,8 @@ func CompanyBindLink(c *gin.Context) {
 		PlatformKey: platform_key.(string),
 		PlatformUid: data.PlatformUid,
 		CompanyKey:  data.CompanyKey,
+		DataOrigin:  data.DataOrigin,
+		SupplierId:  data.SupplierId,
 	}
 
 	err = models.PlatformCompanyAdd(&m)
