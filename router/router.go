@@ -127,6 +127,7 @@ func InitRouter() *gin.Engine {
 		// 下料单
 		apiPlatformV1.POST("/product_cats_list", platform_v1.ProductCatsList) //获取材料大类
 		apiPlatformV1.POST("/material_sync", platform_v1.MaterialSync)        //同步下料单
+		apiPlatformV1.POST("/material_dd_sync", platform_v1.MaterialDDSync)   //同步下料单DD
 
 		// 用户部分
 		apiPlatformV1.POST("/users_dd_sync_qrcode", platform_v1.UsersDDSyncQrcode) //获取同步用户二维码

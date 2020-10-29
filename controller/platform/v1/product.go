@@ -41,3 +41,23 @@ func MaterialSync(c *gin.Context) {
 	}
 	e.ApiOk(c, "操作成功", cb)
 }
+
+func MaterialDDSync(c *gin.Context) {
+	data := struct {
+		MData product_service.DDMaterialAdd  `json:"m_data"`
+		PData []product_service.DDProductAdd `json:"material_contentList"`
+	}{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	platform, _ := c.Get("platform")
+
+	cb, err := product_service.DDProductSync(&data.MData, data.PData, platform.(models.Platform))
+	if err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+	e.ApiOk(c, "操作成功", cb)
+}

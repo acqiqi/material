@@ -22,7 +22,6 @@ func init() {
 	gredis.Setup()  // redis
 	//utils.InitModel()
 	//utils.PDFT()
-
 }
 
 func main() {

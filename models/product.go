@@ -29,7 +29,7 @@ type Product struct {
 	ConfigData          string     `json:"config_data"`           // 自定义字段信息
 	AppendAttachment    string     `json:"append_attachment"`     // 附加的资源库信息
 	ProjectMaterialId   int        `json:"project_material_id"`   // 码里公装对应下料材料id
-	AdminMaterialInfoId int        `json:"admin_materialInfo_id"` // 码里公装对应合同材料id，统计累计数量需要
+	AdminMaterialInfoId string     `json:"admin_materialInfo_id"` // 码里公装对应合同材料id，统计累计数量需要
 	ProjectAdditional   string     `json:"project_additional"`    // 项目补充信息
 	Remark              string     `json:"remark"`                // 备注
 	Length              float64    `json:"length"`                // 长
