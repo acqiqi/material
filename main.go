@@ -25,7 +25,7 @@ func init() {
 }
 
 func main() {
-
+	models.ProductLinkGetInfo(2, "")
 	gin.SetMode(setting.ServerSetting.RunMode)
 
 	routersInit := router.InitRouter()
