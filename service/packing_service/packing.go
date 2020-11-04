@@ -90,17 +90,18 @@ func Add(data PackingAdd, links []PackingProductAdd) (*models.Packing, error) {
 		v.PackingId = model.Id
 
 		link_model := models.PackingProduct{
-			PackingId:     v.PackingId,
-			CompanyId:     v.CompanyId,
-			OrderReturnid: v.OrderReturnid,
-			ProductId:     v.ProductId,
-			MaterialId:    v.MaterialId,
-			Count:         v.Count,
-			ReturnCount:   0,
-			MaterialName:  v.MaterialName,
-			ContractId:    v.ContractId,
-			ProjectId:     v.ProjectId,
-			DepositoryId:  v.DepositoryId,
+			PackingId:      v.PackingId,
+			CompanyId:      v.CompanyId,
+			OrderReturnid:  v.OrderReturnid,
+			ProductId:      v.ProductId,
+			MaterialId:     v.MaterialId,
+			Count:          v.Count,
+			ReturnCount:    0,
+			MaterialName:   v.MaterialName,
+			ContractId:     v.ContractId,
+			ProjectId:      v.ProjectId,
+			DepositoryId:   v.DepositoryId,
+			MaterialLinkId: v.MaterialLinkId,
 		}
 		models.PackingProductAddT(&link_model, &t)
 

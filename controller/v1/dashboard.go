@@ -58,7 +58,7 @@ func DashboardAccount(c *gin.Context) {
 		return
 	}
 
-	data.ProjectId = 18
+	//data.ProjectId = 23
 
 	//查询当前项目
 	project, err := models.ProjectGetInfo(data.ProjectId)
@@ -73,7 +73,6 @@ func DashboardAccount(c *gin.Context) {
 	}
 	//查询项目下对应产品列表 全部
 
-	t := data.BeginTime.AddDate(0, 0, 0)
 	m_count := 0
 	//算出年差月
 	y := data.EndTime.Year() - data.BeginTime.Year()
@@ -83,6 +82,8 @@ func DashboardAccount(c *gin.Context) {
 	m_count = m_count + m + 1
 
 	product_maps := make([]map[string]interface{}, len(product_list))
+
+	str_arr := make([]string, m_count)
 
 	for i, v := range product_list {
 		product_map := make(map[string]interface{})
@@ -98,23 +99,30 @@ func DashboardAccount(c *gin.Context) {
 		product_map["packing_product"] = v.PackingProduct
 		product_maps[i] = product_map
 	}
-
 	for key, value := range product_maps {
+		t := data.BeginTime.AddDate(0, 0, 0)
 		for i := 0; i < m_count; i++ {
-			product_maps[key][t.String()+"_count"] = float64(0)
-			product_maps[key][t.String()+"_price"] = float64(0)
+			str_arr[i] = t.Format("20060102")
+			product_maps[key][t.Format("20060102")+"_count"] = float64(0)
+			product_maps[key][t.Format("20060102")+"_price"] = float64(0)
 			for _, pp := range value["packing_product"].([]models.PackingProduct) {
 				log.Println(pp.ReceiveTime.Year(), t.Year())
 				log.Println(pp.ReceiveTime.Month(), t.Month())
 
 				if pp.ReceiveTime.Year() == t.Year() &&
 					pp.ReceiveTime.Month() == t.Month() {
-					product_maps[key][t.String()+"_count"] = product_maps[key][t.String()+"_count"].(float64) + pp.ReturnCount
-					product_maps[key][t.String()+"_price"] = product_maps[key][t.String()+"_price"].(float64) + value["price"].(float64)
+					product_maps[key][t.Format("20060102")+"_count"] = e.ToFloat64(product_maps[key][t.Format("20060102")+"_count"]) + pp.ReceiveCount
+					product_maps[key][t.Format("20060102")+"_price"] = e.ToFloat64(product_maps[key][t.Format("20060102")+"_price"]) + value["price"].(float64)
 				}
 			}
 			t = t.AddDate(0, 1, 0)
 		}
 	}
-	e.ApiOk(c, "获取成功", product_maps)
+	e.ApiOk(c, "获取成功", struct {
+		Table  interface{} `json:"table"`
+		Header interface{} `json:"header"`
+	}{
+		Table:  product_maps,
+		Header: str_arr,
+	})
 }

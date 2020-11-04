@@ -41,7 +41,7 @@ type Product struct {
 	Cuid              int        `json:"cuid"`
 	CompanyId         int64      `json:"company_id"`
 	Company           Company    `gorm:"ForeignKey:CompanyId" json:"company"`
-	SupplyCycle       int        `json:"supply_cycle"` // 供货周期
+	SupplyCycle       int64      `json:"supply_cycle"` // 供货周期
 	MaterialId        int64      `json:"material_id"`  // 材料单id
 	Material          Material   `gorm:"ForeignKey:MaterialId"  json:"material"`
 	PlatformKey       string     `json:"platform_key"` //平台key

@@ -9,6 +9,7 @@ import (
 	"material/lib/setting"
 	"material/models"
 	"material/router"
+	_ "material/task"
 	"net/http"
 	"runtime"
 )
@@ -25,7 +26,6 @@ func init() {
 }
 
 func main() {
-	models.ProductLinkGetInfo(2, "")
 	gin.SetMode(setting.ServerSetting.RunMode)
 
 	routersInit := router.InitRouter()

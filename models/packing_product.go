@@ -30,9 +30,11 @@ type PackingProduct struct {
 	DepositoryId int64      `json:"depository_id"`
 	Depository   Depository `gorm:"ForeignKey:DepositoryId" json:"depository"`
 
-	Status      int        `json:"status"`       //0已打包 1已发货 4已收货 已验收
-	ReceiveTime utils.Time `json:"receive_time"` //签收时间
-	IsReceive   int        `json:"is_receive"`   //是否签收
+	Status         int        `json:"status"`           //0已打包 1已发货 4已收货 已验收
+	ReceiveTime    utils.Time `json:"receive_time"`     //签收时间
+	IsReceive      int        `json:"is_receive"`       //是否签收
+	MaterialLinkId int64      `json:"material_link_id"` //下料单链接id
+
 }
 
 // 获取详情

@@ -5,8 +5,11 @@ import (
 	"github.com/astaxie/beego/validation"
 	"log"
 	"material/lib/app"
+	"material/lib/e"
 	"material/lib/utils"
 	"material/models"
+	"strconv"
+	"time"
 )
 
 // 下单新增结构体
@@ -70,7 +73,7 @@ type ProductAdd struct {
 	ArriveDate  utils.Time `json:"arrive_date"` // 到货时间
 	Cuid        int        `json:"cuid"`
 	CompanyId   int64      `json:"company_id"`
-	SupplyCycle int        `json:"supply_cycle"` // 供货周期
+	SupplyCycle int64      `json:"supply_cycle"` // 供货周期
 
 	PlatformKey string `json:"platform_key"` //平台key
 	PlatformUid string `json:"platform_uid"` //平台uid
@@ -85,8 +88,13 @@ type CBProjectSync struct {
 	Material models.Material
 }
 
+type MaterialSelectData struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"` //
+}
+
 //同步下料单
-func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platform) (cb interface{}, err error) {
+func ProductSync(m_data *MaterialAdd, data []map[string]interface{}, platform models.Platform) (cb interface{}, err error) {
 	// 查询是否有同步过的材料
 	_, err = models.MaterialCheck(m_data.PlatformId, m_data.PlatformKey, m_data.PlatformUid)
 	if err == nil {
@@ -157,13 +165,13 @@ func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platfor
 		for i, v := range data {
 			log.Println(i, v)
 			//检测数据是否正常
-			validate_item.Required(v.MaterialName, "MaterialName").Message("请输入材料名称")
-			validate_item.Required(v.Price, "TotalAmount").Message("请输入正确的材料单价")
-			validate_item.Required(v.Count, "Count").Message("请输入正确的数量")
-			validate_item.Required(v.CompanyId, "ContractCount").Message("请输入正确的合同数量")
-			validate_item.Required(v.ProjectId, "ProjectId").Message("项目有误")
-			validate_item.Required(v.PlatformId, "PlatformId").Message("请输入id")
-			validate_item.Required(v.Unit, "Unit").Message("请输入单位")
+			validate_item.Required(e.ToString(v["material_name"]), "MaterialName").Message("请输入材料名称")
+			validate_item.Required(e.ToFloat64(v["price"]), "TotalAmount").Message("请输入正确的材料单价")
+			validate_item.Required(e.ToFloat64(v["count"]), "Count").Message("请输入正确的数量")
+			validate_item.Required(e.ToFloat64(v["company_id"]), "ContractCount").Message("请输入正确的合同数量")
+			validate_item.Required(e.ToInt64(v["project_id"]), "ProjectId").Message("项目有误")
+			validate_item.Required(e.ToInt64(v["platform_id"]), "PlatformId").Message("请输入id")
+			validate_item.Required(e.ToString(v["unit"]), "Unit").Message("请输入单位")
 			//第一层表单验证
 			if valid.HasErrors() {
 				app.MarkErrors(valid.Errors)
@@ -171,53 +179,53 @@ func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platfor
 				t.Rollback() //回滚
 				return nil, app.ErrorsGetOne(valid.Errors)
 			}
-			data[i].PlatformKey = platform.PlatformKey
-			data[i].ProjectId = project.Id
-			data[i].ProjectName = project.ProjectName
-			data[i].CompanyId = project.CompanyId
+			data[i]["platform_key"] = platform.PlatformKey
+			data[i]["project_id"] = project.Id
+			data[i]["project_name"] = project.ProjectName
+			data[i]["company_id"] = project.CompanyId
 
 			//判断产品是否存在
-			p_item, err := models.ProductCheckInfo(data[i].MaterialName, data[i].Standard, project.Id)
+			p_item, err := models.ProductCheckInfo(e.ToString(data[i]["material_name"]), e.ToString(data[i]["standard"]), project.Id)
 			productModel := models.Product{}
 			if err != nil {
 				// 处理新增数据结构
 				productModel = models.Product{
 					Model:              models.Model{},
-					MaterialName:       data[i].MaterialName,
-					BlankingAttachment: data[i].BlankingAttachment,
-					Attachment:         data[i].Attachment,
-					InstallMap:         data[i].InstallMap,
-					Price:              data[i].Price,
-					Count:              data[i].Count,
-					ContractCount:      data[i].ContractCount,
+					MaterialName:       e.ToString(data[i]["material_name"]),
+					BlankingAttachment: e.ToString(data[i]["blanking_attachment"]),
+					Attachment:         e.ToString(data[i]["attachment"]),
+					InstallMap:         e.ToString(data[i]["install_map"]),
+					Price:              e.ToFloat64(data[i]["price"]),
+					Count:              e.ToFloat64(data[i]["count"]),
+					ContractCount:      e.ToFloat64(data[i]["contract_count"]),
 					PackCount:          0,
 					SendCount:          0,
 					ReturnCount:        0,
 					ReceiveCount:       0,
-					Unit:               data[i].Unit,
+					Unit:               e.ToString(data[i]["unit"]),
 					ProjectId:          project.Id,
 					ProjectName:        project.ProjectName,
 					ReplenishmentFlag:  0,
 					ProductSubFlag:     0,
 					ConfigData:         "[]",
-					AppendAttachment:   data[i].AppendAttachment,
+					AppendAttachment:   e.ToString(data[i]["append_attachment"]),
 					//ProjectMaterialId:   data[i].ProjectMaterialId,
 					//AdminMaterialInfoId: "",
-					ProjectAdditional: data[i].ProjectAdditional,
-					Remark:            data[i].Remark,
-					Length:            data[i].Length,
-					Width:             data[i].Width,
-					Height:            data[i].Height,
-					Location:          data[i].Location,
-					Standard:          data[i].Standard,
-					ArriveDate:        data[i].ArriveDate,
+					ProjectAdditional: e.ToString(data[i]["project_additional"]),
+					Remark:            e.ToString(data[i]["remark"]),
+					Length:            e.ToFloat64(data[i]["length"]),
+					Width:             e.ToFloat64(data[i]["width"]),
+					Height:            e.ToFloat64(data[i]["height"]),
+					Location:          e.ToString(data[i]["location"]),
+					Standard:          e.ToString(data[i]["standard"]),
+					ArriveDate:        utils.Time{},
 					Cuid:              0,
 					CompanyId:         project.CompanyId,
-					SupplyCycle:       data[i].SupplyCycle,
+					SupplyCycle:       e.ToInt64(data[i]["supply_cycle"]),
 					MaterialId:        mm.Id,
 					PlatformKey:       platform.PlatformKey,
 					PlatformUid:       mm.PlatformUid,
-					PlatformId:        data[i].PlatformId,
+					PlatformId:        e.ToString(data[i]["platform_id"]),
 					ContractId:        mm.ContractId,
 				}
 				err = models.ProductAddT(&productModel, &t)
@@ -225,20 +233,89 @@ func ProductSync(m_data *MaterialAdd, data []ProductAdd, platform models.Platfor
 					t.Rollback()
 					return nil, err
 				}
+				if mm.Type == models.P内装材料 {
+
+				}
+				switch mm.Type {
+				case models.P内装材料:
+					break
+				case models.P幕墙面材:
+					lm := models.ProductLinkSurface{
+						W1:               e.ToFloat64(data[i]["w1"]),
+						W2:               e.ToFloat64(data[i]["w2"]),
+						W3:               e.ToFloat64(data[i]["w3"]),
+						W4:               e.ToFloat64(data[i]["w4"]),
+						W5:               e.ToFloat64(data[i]["w5"]),
+						W6:               e.ToFloat64(data[i]["w6"]),
+						W7:               e.ToFloat64(data[i]["w7"]),
+						W8:               e.ToFloat64(data[i]["w8"]),
+						W9:               e.ToFloat64(data[i]["w9"]),
+						H1:               e.ToFloat64(data[i]["h1"]),
+						H2:               e.ToFloat64(data[i]["h2"]),
+						H3:               e.ToFloat64(data[i]["h3"]),
+						H4:               e.ToFloat64(data[i]["h4"]),
+						H5:               e.ToFloat64(data[i]["h5"]),
+						H6:               e.ToFloat64(data[i]["h6"]),
+						H7:               e.ToFloat64(data[i]["h7"]),
+						H8:               e.ToFloat64(data[i]["h8"]),
+						H9:               e.ToFloat64(data[i]["h9"]),
+						L1:               e.ToFloat64(data[i]["l1"]),
+						L2:               e.ToFloat64(data[i]["l2"]),
+						L3:               e.ToFloat64(data[i]["l3"]),
+						L4:               e.ToFloat64(data[i]["l4"]),
+						L5:               e.ToFloat64(data[i]["l5"]),
+						L6:               e.ToFloat64(data[i]["l6"]),
+						L7:               e.ToFloat64(data[i]["l7"]),
+						L8:               e.ToFloat64(data[i]["l8"]),
+						L9:               e.ToFloat64(data[i]["l9"]),
+						WSize:            e.ToInt64(data[i]["w_size"]),
+						HSize:            e.ToInt64(data[i]["h_size"]),
+						LSize:            e.ToInt64(data[i]["l_size"]),
+						SurfaceTreatment: e.ToString(data[i]["surface_treatment"]),
+						Color:            e.ToString(data[i]["color"]),
+						Area:             e.ToString(data[i]["area"]),
+						TotalCount:       e.ToString(data[i]["total_count"]),
+						ProductId:        productModel.Id,
+					}
+					models.ProductLinkSurfaceAddT(&lm, &t)
+					break
+				case models.P幕墙辅材:
+					lm := models.ProductLinkAuxiliary{
+						MaterialStatus: e.ToString(data[i]["material_status"]),
+						Weight:         e.ToString(data[i]["weight"]),
+						TotalArea:      e.ToString(data[i]["total_area"]),
+						ProductId:      productModel.Id,
+					}
+					models.ProductLinkAuxiliaryAddT(&lm, &t)
+					break
+				case models.P幕墙线材:
+					lm := models.ProductLinkWire{
+						SurfaceTreatment: e.ToString(data[i]["surface_treatment"]),
+						Color:            e.ToString(data[i]["color"]),
+						Area:             e.ToString(data[i]["area"]),
+						TotalCount:       e.ToString(data[i]["total_count"]),
+						ProductId:        productModel.Id,
+					}
+					models.ProductLinkWireAddT(&lm, &t)
+					break
+				}
 			} else {
 				productModel = *p_item
 				models.ProductEditT(productModel.Id, map[string]interface{}{
-					"count": productModel.Count + data[i].Count,
-					"price": data[i].Price,
+					"count": productModel.Count + e.ToFloat64(data[i]["count"]),
+					"price": e.ToFloat64(data[i]["price"]),
 				}, &t)
 			}
 			ml := models.MaterialLink{
-				MaterialId: mm.Id,
-				ProductId:  productModel.Id,
-				CompanyId:  project.CompanyId,
-				Count:      data[i].Count,
-				ProjectId:  project.Id,
-				Price:      data[i].Price,
+				MaterialId:  mm.Id,
+				ProductId:   productModel.Id,
+				CompanyId:   project.CompanyId,
+				Count:       e.ToFloat64(data[i]["count"]),
+				ProjectId:   project.Id,
+				Price:       e.ToFloat64(data[i]["price"]),
+				SupplyCycle: e.ToInt64(data[i]["supply_cycle"]),
+				ReceiveTime: utils.Time{Time: time.Now()},
+				Status:      0,
 			}
 			models.MaterialLinkAddT(&ml, &t)
 		}
@@ -380,10 +457,32 @@ func Select(maps string) ([]*models.Product, error) {
 	return models.ProductGetSelect(maps)
 }
 
-func Tables(project_id int64, company_id int64) ([]*models.Product, error) {
+func Tables(project_id, material_id, company_id int64) ([]*models.MaterialLink, error) {
 	maps := utils.WhereToMap(nil)
 	maps["flag"] = 1
 	maps["company_id"] = company_id
+
+	maps["material_id"] = material_id
+
+	//if material_id != 0 {
+	//	maps["material_id"] = material_id
+	//}
+
 	maps["project_id"] = project_id
-	return models.ProductGetSelect(utils.BuildWhere(maps))
+	return models.MaterialLinkGetAllLists(utils.BuildWhere(maps))
+}
+
+func SelectMaterialLists(company_id, project_id int64) ([]MaterialSelectData, error) {
+	lists, err := models.MaterialGetSelect("flag =1 AND company_id = " + strconv.Itoa(int(company_id)) + " AND project_id = " + strconv.Itoa(int(project_id)))
+	if err != nil {
+		return nil, err
+	}
+	cb := make([]MaterialSelectData, len(lists))
+	for i := 0; i < len(lists); i++ {
+		cb[i] = MaterialSelectData{
+			Id:   lists[i].Id,
+			Name: lists[i].Name,
+		}
+	}
+	return cb, nil
 }

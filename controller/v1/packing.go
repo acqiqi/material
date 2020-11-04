@@ -7,7 +7,6 @@ import (
 	"material/lib/utils"
 	"material/models"
 	"material/service/packing_service"
-	"material/service/product_service"
 )
 
 // 仓库列表
@@ -63,6 +62,12 @@ func PackingCreate(c *gin.Context) {
 		return
 	}
 
+	material, err := models.MaterialGetInfo(data.Packing.MaterialId)
+	if err != nil {
+		e.ApiErr(c, "下料单有误")
+		return
+	}
+
 	company, _ := c.Get("company")
 	if project.CompanyId != company.(models.CompanyUsers).Company.Id {
 		e.ApiErr(c, "非法请求")
@@ -74,14 +79,14 @@ func PackingCreate(c *gin.Context) {
 		//先查询数据
 		products_in := make([]int64, len(data.Links))
 		for i, v := range data.Links {
-			products_in[i] = v.ProductId
+			products_in[i] = v.MaterialLinkId
 		}
 		maps := utils.WhereToMap(nil)
 		maps["id__in"] = products_in
 		maps["company_id"] = company.(models.CompanyUsers).Company.Id
 		maps["project_id"] = project.Id
 		maps["flag"] = 1
-		products, err := product_service.Select(utils.BuildWhere(maps))
+		products, err := models.MaterialLinkGetAllLists(utils.BuildWhere(maps))
 		if err != nil {
 			e.ApiErr(c, "获取产品列表有误")
 			return
@@ -94,15 +99,15 @@ func PackingCreate(c *gin.Context) {
 		for i, v := range data.Links {
 			in_flag := false
 			for _, p := range products {
-				if p.Id == v.ProductId {
+				if p.Id == v.MaterialLinkId {
 					in_flag = true
 					//判断库存是否满足
-					if (p.Count-p.PackCount)-v.Count < 0 {
-						e.ApiErr(c, p.ProjectName+"库存不足")
+					if (p.Product.Count-p.Product.PackCount)-v.Count < 0 {
+						e.ApiErr(c, p.Product.ProjectName+"库存不足")
 						return
 					}
 					if v.Count <= 0 {
-						e.ApiErr(c, p.ProjectName+"请输入正确的打包数量")
+						e.ApiErr(c, p.Product.ProjectName+"请输入正确的打包数量")
 						return
 					}
 					//v.CompanyId = project.CompanyId
@@ -111,9 +116,11 @@ func PackingCreate(c *gin.Context) {
 					//v.MaterialName = p.MaterialName
 					data.Links[i].CompanyId = project.CompanyId
 					data.Links[i].ProjectId = project.Id
-					data.Links[i].MaterialId = p.MaterialId
-					data.Links[i].MaterialName = p.MaterialName
+					data.Links[i].MaterialId = material.Id
+					data.Links[i].MaterialName = p.Product.MaterialName
+					data.Links[i].ProductId = p.Product.Id
 					data.Links[i].DepositoryId = depository.Id
+					data.Links[i].MaterialLinkId = p.Id
 				}
 			}
 			if !in_flag {

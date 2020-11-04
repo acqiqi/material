@@ -29,6 +29,11 @@ type Material struct {
 	Contract   Contract `gorm:"ForeignKey:ContractId" json:"contract"`
 
 	BeginTime utils.Time `json:"begin_time"` //同步開始時間
+
+	ReceiveTime utils.Time `json:"receive_time"` //接收时间
+	IsReceive   int64      `json:"is_receive"`   //是否接收
+
+	MaterialLinkId int64 `json:"material_link_id"` //下料单链接id
 }
 
 // 三方检测是否存在
@@ -47,6 +52,13 @@ func MaterialCheck(platform_id string, platform_key string, platform_uid string)
 func MaterialAddT(material *Material, t *gorm.DB) error {
 	material.Flag = 1
 	if err := t.Create(&material).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func MaterialEditT(id int64, data interface{}, t *gorm.DB) error {
+	if err := t.Model(&Material{}).Where("id = ? AND flag = 1 ", id).Updates(data).Error; err != nil {
 		return err
 	}
 	return nil
@@ -78,4 +90,13 @@ func MaterialGetListsCount(maps interface{}) int {
 	count := 0
 	db.Preload("Project").Where(maps).Find(&products).Count(&count)
 	return count
+}
+
+func MaterialGetSelect(maps string) ([]*Material, error) {
+	var d []*Material
+	err := db.Where(maps).Order("id desc").Find(&d).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	return d, nil
 }

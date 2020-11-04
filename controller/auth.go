@@ -19,8 +19,15 @@ type auth struct {
 }
 
 type mobile_login struct {
-	Mobile string `json:"mobile" valid:"Required; MaxSize(32)"`
-	Code   string `json:"code" valid:"Required; MaxSize(32)"`
+	Mobile   string `json:"mobile" valid:"Required; MaxSize(32)"`
+	Code     string `json:"code" valid:"Required; MaxSize(32)"`
+	IsRe     int    `json:"is_re"`
+	Password string `json:"password"`
+}
+
+type password_login struct {
+	Mobile   string `json:"mobile" valid:"Required; MaxSize(32)"`
+	Password string `json:"password"`
 }
 
 type user_info_api struct {
@@ -43,6 +50,70 @@ type user_info_api struct {
 			NoMoney  string `json:"no_money"`
 		} `json:"user_info"`
 	} `json:"data"`
+}
+
+func PasswordLogin(c *gin.Context) {
+	data := password_login{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+	log.Println(setting.PlatformSetting.PlatformKey)
+
+	//处理请求
+	headers := make(map[string]string)
+	headers["PlatformKey"] = setting.PlatformSetting.PlatformKey
+	// 注册接口
+	url := setting.PlatformSetting.ApiBaseUrl + dd.DD_API_MOBILE_LOGIN
+	cb := e.ApiJson{}
+	if err := utils.HttpPostJsonHeader(url, data, headers, &cb); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+	if cb.Code != 0 {
+		e.ApiErr(c, cb.Msg)
+		return
+	}
+	//获取UserInfo
+	user_info := user_info_api{}
+	url = setting.PlatformSetting.ApiBaseUrl + dd.DD_API_AUTH_GET_USER_INFO
+	headers["Authorization"] = cb.Data.(map[string]interface{})["token"].(string) //插入Token
+	if err := utils.HttpPostJsonHeader(url, e.GetEmptyStruct(), headers, &user_info); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+	if user_info.Code != 0 {
+		e.ApiErr(c, user_info.Msg)
+		return
+	}
+	uid := int64(0)
+	//查询本地是否注册
+	my_user_info, err := models.GetUsersInfoCuid(user_info.Data.UserInfo.ID)
+	if err != nil {
+		//直接注册
+		user_model := models.Users{
+			Cuid:     user_info.Data.UserInfo.ID,
+			Nickname: user_info.Data.UserInfo.Nickname,
+			Avatar:   user_info.Data.UserInfo.Avatar,
+			MUserKey: models.GetMUserKey(),
+		}
+		if err := models.AddUsers(&user_model); err != nil {
+			e.ApiErr(c, err.Error())
+			return
+		}
+		uid = user_model.Cuid
+	} else {
+		uid = my_user_info.Cuid
+	}
+	log.Println(uid)
+	token, err := utils.GenerateToken(uid)
+	if err != nil {
+		e.ApiOpt(c, e.ERROR_AUTH_TOKEN, e.GetMsg(e.ERROR_AUTH_TOKEN), e.GetEmptyStruct())
+		return
+	}
+	e.ApiOk(c, "登录成功", struct {
+		Token string `json:"token"`
+	}{Token: token})
 }
 
 func AutoLogin(c *gin.Context) {

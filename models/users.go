@@ -12,7 +12,7 @@ type Users struct {
 	Password string `json:"password"`   // 密码 - 暂时不用
 	Nickname string `json:"nickname"`   // 昵称
 	Avatar   string `json:"avatar"`     //头像
-	Mobile   int    `json:"mobile"`     // 手机号
+	Mobile   string `json:"mobile"`     // 手机号
 	MUserKey string `json:"m_user_key"` // 用户Key
 
 	// 目前要处理的三方平台的存储信息

@@ -24,8 +24,8 @@ func ProductCatsList(c *gin.Context) {
 // 同步下料单
 func MaterialSync(c *gin.Context) {
 	data := struct {
-		MData product_service.MaterialAdd  `json:"m_data"`
-		PData []product_service.ProductAdd `json:"p_data"`
+		MData product_service.MaterialAdd `json:"m_data"`
+		PData []map[string]interface{}    `json:"p_data"`
 	}{}
 	if err := c.BindJSON(&data); err != nil {
 		e.ApiErr(c, err.Error())
@@ -40,6 +40,26 @@ func MaterialSync(c *gin.Context) {
 		return
 	}
 	e.ApiOk(c, "操作成功", cb)
+}
+
+func MaterialSyncCopy(c *gin.Context) {
+	//data := struct {
+	//	MData product_service.MaterialAdd  `json:"m_data"`
+	//	PData []product_service.ProductAdd `json:"p_data"`
+	//}{}
+	//if err := c.BindJSON(&data); err != nil {
+	//	e.ApiErr(c, err.Error())
+	//	return
+	//}
+	//
+	//platform, _ := c.Get("platform")
+	//
+	//cb, err := product_service.ProductSync(&data.MData, data.PData, platform.(models.Platform))
+	//if err != nil {
+	//	e.ApiErr(c, err.Error())
+	//	return
+	//}
+	//e.ApiOk(c, "操作成功", cb)
 }
 
 func MaterialDDSync(c *gin.Context) {

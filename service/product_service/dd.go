@@ -211,7 +211,7 @@ func DDProductSync(m_data *DDMaterialAdd, data []DDProductAdd, platform models.P
 					ArriveDate:        data[i].ArriveDate,
 					Cuid:              0,
 					CompanyId:         project.CompanyId,
-					SupplyCycle:       sc,
+					SupplyCycle:       int64(sc),
 					MaterialId:        mm.Id,
 					PlatformKey:       platform.PlatformKey,
 					PlatformUid:       mm.PlatformUid,

@@ -1,6 +1,25 @@
 package models
 
+import "github.com/jinzhu/gorm"
+
 type ProductLinkWire struct {
+	Model
+	SurfaceTreatment string `json:"surface_treatment"` // 表面处理
+	Color            string `json:"color"`             // 颜色
+	Area             string `json:"area"`              // 单面积(㎡/片)
+	TotalCount       string `json:"total_count"`       // 总面积(㎡)
+	ProductId        int64  `json:"product_id"`
+}
+
+func ProductLinkWireAddT(product *ProductLinkWire, t *gorm.DB) error {
+	product.Flag = 1
+	if err := t.Create(&product).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+type ProductLinkAuxiliary struct {
 	Model
 	MaterialStatus string `json:"material_status"` // 材质状态
 	Weight         string `json:"weight"`          // 单重量
@@ -8,13 +27,12 @@ type ProductLinkWire struct {
 	ProductId      int64  `json:"product_id"`
 }
 
-type ProductLinkAuxiliary struct {
-	Model
-	SurfaceTreatment string `json:"surface_treatment"` // 表面处理
-	Color            string `json:"color"`             // 颜色
-	Area             string `json:"area"`              // 单面积(㎡/片)
-	TotalCount       string `json:"total_count"`       // 总面积(㎡)
-	ProductId        int64  `json:"product_id"`
+func ProductLinkAuxiliaryAddT(product *ProductLinkAuxiliary, t *gorm.DB) error {
+	product.Flag = 1
+	if err := t.Create(&product).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 type ProductLinkSurface struct {
@@ -56,58 +74,111 @@ type ProductLinkSurface struct {
 	ProductId        int64   `json:"product_id"`
 }
 
+func ProductLinkSurfaceAddT(product *ProductLinkSurface, t *gorm.DB) error {
+	product.Flag = 1
+	if err := t.Create(&product).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 const (
-	内装材料 int = 0 + iota
-	幕墙面材
-	幕墙辅材
-	幕墙线材
+	P内装材料 int = 0 + iota
+	P幕墙面材
+	P幕墙辅材
+	P幕墙线材
 )
 
+var ProductType = map[int]string{
+	P内装材料: "内装材料",
+	P幕墙面材: "幕墙面材",
+	P幕墙辅材: "幕墙辅材",
+	P幕墙线材: "幕墙线材",
+}
+
 // 内装材料
-type ProductLinkDefaultData Product
+type ProductLinkDefaultData MaterialLink
 
 // 面材
 type ProductLinkSurfaceData struct {
-	Product
-	ProductLinkSurface ProductLinkSurface `gorm:"ForeignKey:ProductId" json:"product_link_surface"`
+	MaterialLink
+	ProductLinkSurface ProductLinkSurface `gorm:"ForeignKey:ProductId;AssociationForeignKey:ProductId"  json:"link"`
 }
 
 // 辅材
 type ProductLinkAuxiliaryData struct {
-	Product
-	ProductLinkAuxiliary ProductLinkAuxiliary `gorm:"ForeignKey:ProductId" json:"product_link_auxiliary"`
+	MaterialLink
+	ProductLinkAuxiliary ProductLinkAuxiliary `gorm:"ForeignKey:ProductId;AssociationForeignKey:ProductId" json:"link"`
 }
 
 // 线材
 type ProductLinkWireData struct {
-	Product
-	ProductLinkWire ProductLinkWire `gorm:"ForeignKey:ProductId" json:"product_link_wire"`
+	MaterialLink
+	ProductLinkWire ProductLinkWire `gorm:"ForeignKey:ProductId;AssociationForeignKey:ProductId" json:"link"`
 }
 
 func ProductLinkGetInfo(product_type int, product_id string) (cb interface{}, err error) {
 	switch product_type {
-	case 内装材料:
+	case P内装材料:
 		var product ProductLinkDefaultData
-		if err := db.Where("id = ? AND flag =1", product_id).Table("vhake_product").First(&product).Error; err == nil {
+		if err := db.Where("id = ? AND flag =1", product_id).Preload("Product").Table("vhake_material_link").First(&product).Error; err == nil {
 			return product, nil
 		}
 		break
-	case 幕墙面材:
+	case P幕墙面材:
 		var product ProductLinkSurfaceData
-		if err := db.Where("id = ? AND flag =1", product_id).Preload("ProductLinkSurface").Table("vhake_product").First(&product).Error; err == nil {
+		if err := db.Where("id = ? AND flag =1", product_id).Preload("Product").Preload("ProductLinkSurface").Table("vhake_material_link").First(&product).Error; err == nil {
 			return product, nil
 		}
 		break
-	case 幕墙辅材:
+	case P幕墙辅材:
 		var product ProductLinkAuxiliaryData
-		if err := db.Where("id = ? AND flag =1", product_id).Preload("ProductLinkAuxiliary").Table("vhake_product").First(&product).Error; err == nil {
+		if err := db.Where("id = ? AND flag =1", product_id).Preload("Product").Preload("ProductLinkAuxiliary").Table("vhake_material_link").First(&product).Error; err == nil {
 			return product, nil
 		}
 		break
-	case 幕墙线材:
+	case P幕墙线材:
 		var product ProductLinkWireData
-		if err := db.Where("id = ? AND flag =1", product_id).Preload("ProductLinkWire").Table("vhake_product").First(&product).Error; err == nil {
+		if err := db.Where("id = ? AND flag =1", product_id).Preload("Product").Preload("ProductLinkWire").Table("vhake_material_link").First(&product).Error; err == nil {
 			return product, nil
+		}
+		break
+	}
+	return nil, err
+}
+
+func ProductLinkGetLists(product_type, pageNum, pageSize int, maps interface{}) (cb interface{}, err error) {
+	switch product_type {
+	case P内装材料:
+		var products []*ProductLinkDefaultData
+		if err := db.Model(&Product{}).Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Preload("Product").Table("vhake_material_link").Find(&products).Error; err == nil {
+			return products, nil
+		} else {
+			return []ProductLinkDefaultData{}, err
+		}
+		break
+	case P幕墙面材:
+		var products []*ProductLinkSurfaceData
+		if err := db.Model(&Product{}).Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Preload("Product").Preload("ProductLinkSurface").Table("vhake_material_link").Find(&products).Error; err == nil {
+			return products, nil
+		} else {
+			return []ProductLinkSurfaceData{}, err
+		}
+		break
+	case P幕墙辅材:
+		var products []*ProductLinkAuxiliaryData
+		if err := db.Model(&Product{}).Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Preload("Product").Preload("ProductLinkAuxiliary").Table("vhake_material_link").Find(&products).Error; err == nil {
+			return products, nil
+		} else {
+			return []ProductLinkAuxiliaryData{}, err
+		}
+		break
+	case P幕墙线材:
+		var products []*ProductLinkWireData
+		if err := db.Model(&Product{}).Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Preload("Product").Preload("ProductLinkWire").Table("vhake_material_link").Find(&products).Error; err == nil {
+			return products, nil
+		} else {
+			return []ProductLinkWireData{}, err
 		}
 		break
 	}

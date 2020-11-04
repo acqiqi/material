@@ -13,17 +13,25 @@ type Time struct {
 }
 
 const (
-	format = "2006-01-02 15:04:05"
+	format  = "2006-01-02 15:04:05"
+	format2 = "2006-01-02"
 )
 
 // 2. 为 Xtime 重写 MarshaJSON 方法，在此方法中实现自定义格式的转换；
 func (t Time) MarshalJSON() ([]byte, error) {
 	output := fmt.Sprintf("\"%s\"", t.Format(format))
+
 	return []byte(output), nil
 }
 
 func (t *Time) UnmarshalJSON(data []byte) (err error) {
+	if string(data) == "null" {
+		return nil
+	}
 	now, err := time.ParseInLocation(`"`+format+`"`, string(data), time.Local)
+	if err != nil {
+		now, err = time.ParseInLocation(`"`+format2+`"`, string(data), time.Local)
+	}
 	*t = Time{now}
 	return
 }

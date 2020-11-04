@@ -8,6 +8,7 @@ import (
 	"material/models"
 	"material/service/product_service"
 	"material/service/send_service"
+	"time"
 )
 
 // 下料单列表
@@ -52,7 +53,7 @@ func MaterialInfo(c *gin.Context) {
 		return
 	}
 
-	ps, err := models.MaterialLinkGetAllLists(utils.BuildWhere(map[string]interface{}{
+	ps, err := models.ProductLinkGetLists(info.Type, 0, 9999, utils.BuildWhere(map[string]interface{}{
 		"material_id": info.Id,
 	}))
 
@@ -63,6 +64,62 @@ func MaterialInfo(c *gin.Context) {
 		Info:     *info,
 		Products: ps,
 	})
+}
+
+// 接收下料单并开始计算供货周期
+func MaterialReceive(c *gin.Context) {
+	data := e.ApiId{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	m, err := models.MaterialGetInfo(data.Id)
+	if err != nil {
+		e.ApiErr(c, "下料单不正确")
+		return
+	}
+	company, _ := c.Get("company")
+	if m.CompanyId != company.(models.CompanyUsers).Company.Id {
+		e.ApiErr(c, "非法请求")
+		return
+	}
+
+	if m.IsReceive == 1 {
+		e.ApiErr(c, "已经接收，请勿重复接收")
+		return
+	}
+
+	//处理接收
+	t := *models.NewTransaction()
+	m.IsReceive = 1
+	m.ReceiveTime = utils.Time{Time: time.Now()}
+	if err := models.MaterialEditT(m.Id, m, &t); err != nil {
+		e.ApiErr(c, "接收失败")
+		t.Rollback()
+		return
+	}
+
+	//查询所有Link
+	maps := utils.WhereToMap(nil)
+	maps["flag"] = 1
+	maps["material_id"] = m.Id
+	ml_list, err := models.MaterialLinkGetAllLists(utils.BuildWhere(maps))
+	if err != nil {
+		e.ApiErr(c, "接受错误 - 获取数据列表有误")
+		t.Rollback()
+		return
+	}
+
+	for _, v := range ml_list {
+		v.IsReceive = 1
+		ml_time := time.Now()
+		v.ReceiveTime = utils.Time{Time: ml_time.AddDate(0, 0, int(v.SupplyCycle))}
+		models.MaterialLinkEditT(v.Id, v, &t)
+	}
+
+	t.Commit()
+	e.ApiOk(c, "操作成功", e.GetEmptyStruct())
 }
 
 // 产品 材料列表
@@ -302,7 +359,8 @@ func ProductClassDelete(c *gin.Context) {
 // 材料表格
 func ProductTable(c *gin.Context) {
 	data := struct {
-		Id int64 `json:"id"`
+		Id         int64 `json:"id"`
+		MaterialId int64 `json:"material_id"`
 	}{}
 	if err := c.BindJSON(&data); err != nil {
 		e.ApiErr(c, err.Error())
@@ -310,15 +368,32 @@ func ProductTable(c *gin.Context) {
 	}
 
 	company, _ := c.Get("company")
-	list, err := product_service.Tables(data.Id, company.(models.CompanyUsers).Company.Id)
+	list, err := product_service.Tables(data.Id, data.MaterialId, company.(models.CompanyUsers).Company.Id)
 	if err != nil {
 		e.ApiErr(c, "非法请求")
 		return
 	}
-
 	e.ApiOk(c, "获取成功", struct {
 		Table interface{} `json:"table"`
 	}{
 		Table: list,
 	})
+}
+
+// 获取下料单Select
+func MaterialSelect(c *gin.Context) {
+	data := e.ApiId{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	company, _ := c.Get("company")
+	lists, err := product_service.SelectMaterialLists(company.(models.CompanyUsers).Company.Id, data.Id)
+	if err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+	e.ApiOk(c, "获取成功", lists)
+	return
 }

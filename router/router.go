@@ -75,8 +75,10 @@ func InitRouter() *gin.Engine {
 			apiv2.POST("/product_class_edit", v1.ProductClassEdit)     //编辑材料类型
 			apiv2.POST("/product_class_delete", v1.ProductClassDelete) //删除材料类型
 
-			apiv2.POST("/material_list", v1.MaterialList) //下料单列表
-			apiv2.POST("/material_info", v1.MaterialInfo) //下料单详情
+			apiv2.POST("/material_list", v1.MaterialList)       //下料单列表
+			apiv2.POST("/material_info", v1.MaterialInfo)       //下料单详情
+			apiv2.POST("/material_receive", v1.MaterialReceive) //接收下料单
+			apiv2.POST("/material_select", v1.MaterialSelect)   //下料单Select
 
 			apiv2.POST("/product_list", v1.ProductList)              //材料列表
 			apiv2.POST("/return_product_list", v1.ReturnProductList) //退货列表

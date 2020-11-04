@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"material/lib/utils"
 	"net/http"
+	"strconv"
 )
 
 // 提供空 obj类型
@@ -80,4 +81,72 @@ type HttpCallbackData struct {
 	Msg    string      `json:"msg"`    // 主体消息
 	Action string      `json:"action"` // 行为 利用行为二次解析Data结构体
 	Data   interface{} `json:"data"`   // 主体数据根据Action反序列
+}
+
+// 任意类型转 in特64
+func ToInt64(in interface{}) int64 {
+	switch in.(type) {
+	case string:
+		if cb, err := strconv.ParseInt(in.(string), 10, 64); err != nil {
+			return 0
+		} else {
+			return cb
+		}
+		break
+	case int:
+		return int64(in.(int))
+		break
+	case int64:
+		return in.(int64)
+		break
+	case float64:
+		return int64(in.(float64))
+	case float32:
+		return int64(in.(float32))
+	}
+	return 0
+}
+
+// 任意类型转float
+func ToFloat64(in interface{}) float64 {
+	switch in.(type) {
+	case string:
+		if cb, err := strconv.ParseFloat(in.(string), 64); err != nil {
+			return 0
+		} else {
+			return cb
+		}
+		break
+	case int:
+		return float64(in.(int))
+		break
+	case int64:
+		return float64(in.(int64))
+		break
+	case float64:
+		return in.(float64)
+	case float32:
+		return float64(in.(float32))
+	}
+	return 0
+}
+
+// 任意类型转string
+func ToString(in interface{}) string {
+	switch in.(type) {
+	case string:
+		return in.(string)
+		break
+	case int:
+		return strconv.Itoa(in.(int))
+		break
+	case int64:
+		return strconv.FormatInt(in.(int64), 10)
+		break
+	case float64:
+		return strconv.FormatFloat(in.(float64), 'f', -1, 64)
+	case float32:
+		return strconv.FormatFloat(float64(in.(float32)), 'f', -1, 64)
+	}
+	return ""
 }
