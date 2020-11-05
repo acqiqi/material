@@ -69,6 +69,37 @@ func SendInfo(c *gin.Context) {
 	})
 }
 
+func SendSync(c *gin.Context) {
+	data := e.ApiId{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+	info, err := models.SendGetInfo(data.Id)
+	if err != nil {
+		e.ApiErr(c, "下料单不存在")
+		return
+	}
+
+	if info.IsSync != 0 {
+		e.ApiErr(c, "已经同步无法重复同步")
+		return
+	}
+
+	if info.PlatformKey == "" {
+		e.ApiErr(c, "无平台关联，无需同步")
+		return
+	}
+
+	// 处理Callback
+	if err := send_service.SyncCallback(*info); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+	e.ApiOk(c, "操作成功", e.GetEmptyStruct())
+}
+
 func SendCreate(c *gin.Context) {
 	data := struct {
 		Send  send_service.SendAdd `json:"send"`
@@ -98,7 +129,7 @@ func SendCreate(c *gin.Context) {
 
 	data.Send.ProjectId = project.Id
 	data.Send.CompanyId = project.CompanyId
-
+	data.Send.PlatformKey = project.PlatformKey
 	//检测links
 	maps := utils.WhereToMap(nil)
 	maps["id__in"] = data.Links
@@ -133,7 +164,6 @@ func SendCreate(c *gin.Context) {
 		e.ApiErr(c, err.Error())
 		return
 	}
-
 	e.ApiOk(c, "发货成功", cb)
 }
 

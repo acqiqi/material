@@ -1,14 +1,17 @@
 package send_service
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jung-kurt/gofpdf"
 	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
 	"log"
+	"material/lib/e"
 	"material/lib/setting"
 	"material/lib/utils"
 	"material/models"
+	"material/service/packing_service"
 	"strconv"
 )
 
@@ -29,6 +32,9 @@ type SendAdd struct {
 	Express           string   `json:"express_no"`
 
 	Status int `json:"status"` //0未签收 1签收
+
+	IsSync      int    `json:"is_sync"`      // 是否同步 如果platform存在就需要同步
+	PlatformKey string `json:"platform_key"` // 平台key
 }
 
 // 获取Api列表
@@ -49,12 +55,14 @@ func Add(data SendAdd, links []*models.Packing) (*models.Send, error) {
 	}
 
 	model := models.Send{
-		SendNo:    send_no,
-		Count:     total_count,
-		Remark:    data.Remark,
-		CompanyId: data.CompanyId,
-		ProjectId: data.ProjectId,
-		ExpressNo: data.Express,
+		SendNo:      send_no,
+		Count:       total_count,
+		Remark:      data.Remark,
+		CompanyId:   data.CompanyId,
+		ProjectId:   data.ProjectId,
+		ExpressNo:   data.Express,
+		PlatformKey: data.PlatformKey,
+		IsSync:      0,
 	}
 	//创建事务
 	t := *models.NewTransaction()
@@ -93,6 +101,8 @@ func Add(data SendAdd, links []*models.Packing) (*models.Send, error) {
 		}
 	}
 	t.Commit()
+
+	go SyncCallback(model)
 	return &model, nil
 }
 
@@ -141,4 +151,71 @@ func QrcodeBuild(send models.Send) (string, error) {
 		return "", err
 	}
 	return fileStr, nil
+}
+
+// 同步发货
+func SyncCallback(send models.Send) error {
+	//查询平台是否存在
+	platform, err := models.PlatformGetInfoOrKey(send.PlatformKey)
+	if err != nil {
+		return errors.New("平台有误")
+	}
+
+	//创建Send信息
+	send_data := make(map[string]interface{})
+	send_data["id"] = send.Id
+	send_data["send_no"] = send.SendNo                 // 订单编号
+	send_data["count"] = send.Count                    // 发货总数
+	send_data["remark"] = send.Remark                  // 发货备注
+	send_data["express_no"] = send.ExpressNo           // 快递单号
+	send_data["return_count"] = send.ReturnCount       // 退货数量
+	send_data["receive_count"] = send.ReceiveCount     // 接收数量
+	send_data["actual_receiver"] = send.ActualReceiver // 签收人
+	send_data["receive_remark"] = send.ReceiveRemark   //收货备注
+	var ar []string
+	if err := utils.JsonDecode(send.ReceiveAttachment, &ar); err == nil {
+		send_data["receive_attachment"] = ar // 附件
+	}
+
+	//处理打包信息
+	var product_list []map[string]interface{}
+	//for i, v := range send.Packing {
+	//	packing_data[i] = map[string]interface{}{
+	//		"id":           v.Id,          //包装id
+	//		"packing_name": v.PackingName, //包装名
+	//		"serial_no":    v.SerialNo,    //包装编号
+	//		"count":        v.Count,       //产品总数
+	//		"remark":       v.Remark,      //描述
+	//		"product_list": packing_service.SyncGetListPP(v.Id),
+	//	}
+	//}
+	for _, v := range send.Packing {
+		p_list, err := packing_service.SyncGetListPP(v.Id)
+		if err == nil {
+			for _, val := range p_list {
+				product_list = append(product_list, val)
+			}
+		}
+	}
+	send_data["product_list"] = product_list
+
+	callback := e.HttpCallbackData{
+		Code:        0,
+		Msg:         "Send Success",
+		Action:      e.PLATFORT_ACTION_SEND,
+		CallbackUrl: platform.MessageCallbackUrl,
+		Data:        send_data,
+	}
+	c_data := new(e.HttpCallbackData)
+	if err := callback.RequestCallback(&c_data); err != nil {
+		return err
+	}
+	if c_data.Code == 0 {
+		//修改同步状态
+		up_send := map[string]interface{}{
+			"is_sync": 1,
+		}
+		models.SendEdit(send.Id, up_send)
+	}
+	return nil
 }

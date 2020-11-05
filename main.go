@@ -7,6 +7,7 @@ import (
 	"material/lib/gredis"
 	"material/lib/logging"
 	"material/lib/setting"
+	"material/lib/utils"
 	"material/models"
 	"material/router"
 	_ "material/task"
@@ -23,6 +24,15 @@ func init() {
 	gredis.Setup()  // redis
 	//utils.InitModel()
 	//utils.PDFT()
+	log.Println(utils.FormatCamelString("asd_asd", false))
+
+	mk := make(map[string]interface{})
+	mk["mdzz"] = 123
+	if mk["mdzz1"] == nil {
+		log.Println("mdaz")
+	} else {
+		log.Println("ok")
+	}
 }
 
 func main() {

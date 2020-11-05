@@ -182,9 +182,10 @@ func ProjectReceive(c *gin.Context) {
 	platform, err := models.PlatformGetInfoOrKey(project.PlatformKey)
 	if err == nil {
 		callback := e.HttpCallbackData{
-			Code:   0,
-			Msg:    "Receive Success",
-			Action: e.PLATFORM_ACTION_PROJECT_RECEIVE, //接收
+			Code:        0,
+			Msg:         "Receive Success",
+			Action:      e.PLATFORM_ACTION_PROJECT_RECEIVE, //接收
+			CallbackUrl: platform.MessageCallbackUrl,
 			Data: e.PlatformProjectReceiveCallback{
 				Id:          strconv.FormatInt(project.Id, 10),
 				ProjectName: project.ProjectName,
@@ -200,12 +201,8 @@ func ProjectReceive(c *gin.Context) {
 				SupplierId:  company_link.SupplierId,
 			},
 		}
-		cb_url := platform.MessageCallbackUrl
-		cb_str := utils.JsonEncode(callback)
-		log.Println(cb_str)
-
 		c_data := new(e.HttpCallbackData)
-		err = utils.HttpPostJson(cb_url, callback, &c_data)
+		err = callback.RequestCallback(&c_data)
 		if err != nil {
 			log.Println(err.Error())
 		}

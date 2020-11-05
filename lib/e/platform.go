@@ -6,8 +6,20 @@ import (
 )
 
 const (
-	PLATFORM_ACTION_PROJECT_RECEIVE = "PROJECT_RECEIVE" //项目接收
+	PLATFORM_ACTION_PROJECT_RECEIVE  = "PROJECT_RECEIVE"  //项目接收
+	PLATFORT_ACTION_MATERIAL_RECEIVE = "MATERIAL_RECEIVE" //下料单接收
+	PLATFORT_ACTION_SEND             = "SEND"             // 发货
+	PLATFORT_ACTION_PR               = "PR"               // 请款申请
 )
+
+// 用于Callback 请求数据集合
+type HttpCallbackData struct {
+	Code        int         `json:"code"`   // 状态码 默认0成功 1失败 其他专用错误码
+	Msg         string      `json:"msg"`    // 主体消息
+	Action      string      `json:"action"` // 行为 利用行为二次解析Data结构体
+	CallbackUrl string      `json:"callback_url"`
+	Data        interface{} `json:"data"` // 主体数据根据Action反序列
+}
 
 // 项目接收回调结构体
 type PlatformProjectReceiveCallback struct {
@@ -26,4 +38,10 @@ type PlatformProjectReceiveCallback struct {
 }
 
 type PlatformPRCreateCallback struct {
+}
+
+// 实现回调
+func (d *HttpCallbackData) RequestCallback(cb interface{}) error {
+	cb_str := utils.JsonEncode(d)
+	return utils.HttpPostJson(d.CallbackUrl, cb_str, &cb)
 }

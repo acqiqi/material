@@ -74,8 +74,7 @@ func HttpPostJson(url string, body interface{}, cb interface{}) error {
 		return errors.New(string(b))
 	}
 	log.Println(string(b))
-	JsonDecode(string(b), &cb)
-	return nil
+	return JsonDecode(string(b), &cb)
 }
 
 // Http Post Json 请求 带Header

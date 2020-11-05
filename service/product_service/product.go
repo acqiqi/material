@@ -236,64 +236,92 @@ func ProductSync(m_data *MaterialAdd, data []map[string]interface{}, platform mo
 				if mm.Type == models.P内装材料 {
 
 				}
+
+				link := data[i]["link"]
+				var link_data map[string]interface{}
+				switch link.(type) {
+				case map[string]interface{}:
+					link_data = link.(map[string]interface{})
+					break
+				default:
+					link_data = make(map[string]interface{})
+				}
 				switch mm.Type {
 				case models.P内装材料:
 					break
 				case models.P幕墙面材:
+					wsize := int64(0)
+					hsize := int64(0)
+					lsize := int64(0)
+					for wi := int64(1); wi <= 9; wi++ {
+						if e.ToFloat64(utils.SnakeGetMap("width"+e.ToString(wi), link_data)) > 0 {
+							wsize = wi
+						}
+					}
+					for hl := int64(1); hl <= 9; hl++ {
+						if e.ToFloat64(utils.SnakeGetMap("height"+e.ToString(hl), link_data)) > 0 {
+							hsize = hl
+						}
+					}
+					for ll := int64(1); ll <= 9; ll++ {
+						if e.ToFloat64(utils.SnakeGetMap("length"+e.ToString(ll), link_data)) > 0 {
+							lsize = ll
+						}
+					}
 					lm := models.ProductLinkSurface{
-						W1:               e.ToFloat64(data[i]["w1"]),
-						W2:               e.ToFloat64(data[i]["w2"]),
-						W3:               e.ToFloat64(data[i]["w3"]),
-						W4:               e.ToFloat64(data[i]["w4"]),
-						W5:               e.ToFloat64(data[i]["w5"]),
-						W6:               e.ToFloat64(data[i]["w6"]),
-						W7:               e.ToFloat64(data[i]["w7"]),
-						W8:               e.ToFloat64(data[i]["w8"]),
-						W9:               e.ToFloat64(data[i]["w9"]),
-						H1:               e.ToFloat64(data[i]["h1"]),
-						H2:               e.ToFloat64(data[i]["h2"]),
-						H3:               e.ToFloat64(data[i]["h3"]),
-						H4:               e.ToFloat64(data[i]["h4"]),
-						H5:               e.ToFloat64(data[i]["h5"]),
-						H6:               e.ToFloat64(data[i]["h6"]),
-						H7:               e.ToFloat64(data[i]["h7"]),
-						H8:               e.ToFloat64(data[i]["h8"]),
-						H9:               e.ToFloat64(data[i]["h9"]),
-						L1:               e.ToFloat64(data[i]["l1"]),
-						L2:               e.ToFloat64(data[i]["l2"]),
-						L3:               e.ToFloat64(data[i]["l3"]),
-						L4:               e.ToFloat64(data[i]["l4"]),
-						L5:               e.ToFloat64(data[i]["l5"]),
-						L6:               e.ToFloat64(data[i]["l6"]),
-						L7:               e.ToFloat64(data[i]["l7"]),
-						L8:               e.ToFloat64(data[i]["l8"]),
-						L9:               e.ToFloat64(data[i]["l9"]),
-						WSize:            e.ToInt64(data[i]["w_size"]),
-						HSize:            e.ToInt64(data[i]["h_size"]),
-						LSize:            e.ToInt64(data[i]["l_size"]),
-						SurfaceTreatment: e.ToString(data[i]["surface_treatment"]),
-						Color:            e.ToString(data[i]["color"]),
-						Area:             e.ToString(data[i]["area"]),
-						TotalCount:       e.ToString(data[i]["total_count"]),
+						W1:               e.ToFloat64(utils.SnakeGetMap("width1", link_data)),
+						W2:               e.ToFloat64(utils.SnakeGetMap("width2", link_data)),
+						W3:               e.ToFloat64(utils.SnakeGetMap("width3", link_data)),
+						W4:               e.ToFloat64(utils.SnakeGetMap("width4", link_data)),
+						W5:               e.ToFloat64(utils.SnakeGetMap("width5", link_data)),
+						W6:               e.ToFloat64(utils.SnakeGetMap("width6", link_data)),
+						W7:               e.ToFloat64(utils.SnakeGetMap("width7", link_data)),
+						W8:               e.ToFloat64(utils.SnakeGetMap("width8", link_data)),
+						W9:               e.ToFloat64(utils.SnakeGetMap("width9", link_data)),
+						H1:               e.ToFloat64(utils.SnakeGetMap("height1", link_data)),
+						H2:               e.ToFloat64(utils.SnakeGetMap("height2", link_data)),
+						H3:               e.ToFloat64(utils.SnakeGetMap("height3", link_data)),
+						H4:               e.ToFloat64(utils.SnakeGetMap("height4", link_data)),
+						H5:               e.ToFloat64(utils.SnakeGetMap("height5", link_data)),
+						H6:               e.ToFloat64(utils.SnakeGetMap("height6", link_data)),
+						H7:               e.ToFloat64(utils.SnakeGetMap("height7", link_data)),
+						H8:               e.ToFloat64(utils.SnakeGetMap("height8", link_data)),
+						H9:               e.ToFloat64(utils.SnakeGetMap("height9", link_data)),
+						L1:               e.ToFloat64(utils.SnakeGetMap("length1", link_data)),
+						L2:               e.ToFloat64(utils.SnakeGetMap("length2", link_data)),
+						L3:               e.ToFloat64(utils.SnakeGetMap("length3", link_data)),
+						L4:               e.ToFloat64(utils.SnakeGetMap("length4", link_data)),
+						L5:               e.ToFloat64(utils.SnakeGetMap("length5", link_data)),
+						L6:               e.ToFloat64(utils.SnakeGetMap("length6", link_data)),
+						L7:               e.ToFloat64(utils.SnakeGetMap("length7", link_data)),
+						L8:               e.ToFloat64(utils.SnakeGetMap("length8", link_data)),
+						L9:               e.ToFloat64(utils.SnakeGetMap("length9", link_data)),
+						WSize:            wsize,
+						HSize:            hsize,
+						LSize:            lsize,
+						SurfaceTreatment: e.ToString(utils.SnakeGetMap("surface_treatment", link_data)),
+						Color:            e.ToString(utils.SnakeGetMap("color", link_data)),
+						Area:             e.ToString(utils.SnakeGetMap("area", link_data)),
+						TotalCount:       e.ToString(utils.SnakeGetMap("total_count", link_data)),
 						ProductId:        productModel.Id,
 					}
 					models.ProductLinkSurfaceAddT(&lm, &t)
 					break
 				case models.P幕墙辅材:
 					lm := models.ProductLinkAuxiliary{
-						MaterialStatus: e.ToString(data[i]["material_status"]),
-						Weight:         e.ToString(data[i]["weight"]),
-						TotalArea:      e.ToString(data[i]["total_area"]),
+						MaterialStatus: e.ToString(utils.SnakeGetMap("material_status", link_data)),
+						Weight:         e.ToString(utils.SnakeGetMap("weight", link_data)),
+						TotalArea:      e.ToString(utils.SnakeGetMap("total_area", link_data)),
 						ProductId:      productModel.Id,
 					}
 					models.ProductLinkAuxiliaryAddT(&lm, &t)
 					break
 				case models.P幕墙线材:
 					lm := models.ProductLinkWire{
-						SurfaceTreatment: e.ToString(data[i]["surface_treatment"]),
-						Color:            e.ToString(data[i]["color"]),
-						Area:             e.ToString(data[i]["area"]),
-						TotalCount:       e.ToString(data[i]["total_count"]),
+						SurfaceTreatment: e.ToString(utils.SnakeGetMap("surface_treatment", link_data)),
+						Color:            e.ToString(utils.SnakeGetMap("color", link_data)),
+						Area:             e.ToString(utils.SnakeGetMap("area", link_data)),
+						TotalCount:       e.ToString(utils.SnakeGetMap("total_count", link_data)),
 						ProductId:        productModel.Id,
 					}
 					models.ProductLinkWireAddT(&lm, &t)

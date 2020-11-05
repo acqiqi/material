@@ -26,6 +26,10 @@ type Send struct {
 	Status int `json:"status"` //0未签收 1签收
 
 	Packing []Packing `gorm:"ForeignKey:SendId" json:"packing"`
+
+	IsSync      int    `json:"is_sync"`      // 是否同步 如果platform存在就需要同步
+	PlatformKey string `json:"platform_key"` // 平台key
+
 }
 
 // 发货详情
