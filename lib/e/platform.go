@@ -9,6 +9,7 @@ const (
 	PLATFORM_ACTION_PROJECT_RECEIVE  = "PROJECT_RECEIVE"  //项目接收
 	PLATFORT_ACTION_MATERIAL_RECEIVE = "MATERIAL_RECEIVE" //下料单接收
 	PLATFORT_ACTION_SEND             = "SEND"             // 发货
+	PLATFORT_ACTION_SEND_RECEIVER    = "SEND_RECEIVER"    // 发货收货
 	PLATFORT_ACTION_PR               = "PR"               // 请款申请
 )
 

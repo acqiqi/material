@@ -94,23 +94,20 @@ type MaterialSelectData struct {
 }
 
 //同步下料单
-func ProductSync(m_data map[string]interface{}, data []map[string]interface{}, platform models.Platform) (cb interface{}, err error) {
+func ProductSync(m_data *MaterialAdd, data []map[string]interface{}, platform models.Platform) (cb interface{}, err error) {
 	// 查询是否有同步过的材料
-
-	_, err = models.MaterialCheck(e.ToString(utils.SnakeGetMap("platform_id", m_data)),
-		e.ToString(utils.SnakeGetMap("platform_key", m_data)),
-		e.ToString(utils.SnakeGetMap("platform_uid", m_data)))
+	_, err = models.MaterialCheck(m_data.PlatformId, m_data.PlatformKey, m_data.PlatformUid)
 	if err == nil {
 		return nil, errors.New("已经同步过，请勿重复同步")
 	}
 
 	valid := validation.Validation{}
-	valid.Required(e.ToString(utils.SnakeGetMap("name", m_data)), "Name").Message("请输入下料单名称")
-	valid.Required(e.ToString(utils.SnakeGetMap("total_amount", m_data)), "TotalAmount").Message("请输入下料总额")
-	valid.Required(e.ToString(utils.SnakeGetMap("total_tax_amount", m_data)), "TotalTaxAmount").Message("请输入下料含税总额")
-	valid.Required(e.ToInt64(utils.SnakeGetMap("company_id", m_data)), "CompanyId").Message("材料商id有误")
-	valid.Required(e.ToInt64(utils.SnakeGetMap("project_id", m_data)), "ProjectId").Message("项目有误")
-	valid.Required(e.ToString(utils.SnakeGetMap("platform_id", m_data)), "PlatformId").Message("请输入id")
+	valid.Required(m_data.Name, "Name").Message("请输入下料单名称")
+	valid.Required(m_data.TotalAmount, "TotalAmount").Message("请输入下料总额")
+	valid.Required(m_data.TotalTaxAmount, "TotalTaxAmount").Message("请输入下料含税总额")
+	valid.Required(m_data.CompanyId, "CompanyId").Message("材料商id有误")
+	valid.Required(m_data.ProjectId, "ProjectId").Message("项目有误")
+	valid.Required(m_data.PlatformId, "PlatformId").Message("请输入id")
 	//第一层表单验证
 	if valid.HasErrors() {
 		app.MarkErrors(valid.Errors)
@@ -118,13 +115,13 @@ func ProductSync(m_data map[string]interface{}, data []map[string]interface{}, p
 		return nil, app.ErrorsGetOne(valid.Errors)
 	}
 	//查询企业是否正确
-	comapny, err := models.CompanyGetInfo(e.ToInt64(utils.SnakeGetMap("company_id", m_data)))
+	comapny, err := models.CompanyGetInfo(m_data.CompanyId)
 	if err != nil {
 		return nil, errors.New("企业查询有误")
 	}
-	m_data["company_id"] = comapny.Id
+	m_data.CompanyId = comapny.Id
 	// 查询项目
-	project, err := models.ProjectGetInfo(e.ToInt64(utils.SnakeGetMap("project_id", m_data)))
+	project, err := models.ProjectGetInfo(m_data.ProjectId)
 	if err != nil {
 		return nil, errors.New("项目查询有误")
 	}
@@ -144,21 +141,21 @@ func ProductSync(m_data map[string]interface{}, data []map[string]interface{}, p
 	t := *models.NewTransaction()
 	mm := models.Material{
 		Model:          models.Model{},
-		Name:           e.ToString(utils.SnakeGetMap("name", m_data)),
-		TotalAmount:    e.ToFloat64(utils.SnakeGetMap("total_amount", m_data)),
-		TotalTaxAmount: e.ToFloat64(utils.SnakeGetMap("total_tax_amount", m_data)),
-		DesignNo:       e.ToString(utils.SnakeGetMap("design_no", m_data)),
-		ApplyNo:        e.ToString(utils.SnakeGetMap("apply_no", m_data)),
-		Remark:         e.ToString(utils.SnakeGetMap("remark", m_data)),
-		CreateType:     0,
-		Type:           int(e.ToInt64(utils.SnakeGetMap("type", m_data))), //  内装材料,    幕墙面材,    幕墙辅材,    幕墙线材
+		Name:           m_data.Name,
+		TotalAmount:    m_data.TotalAmount,
+		TotalTaxAmount: m_data.TotalTaxAmount,
+		DesignNo:       m_data.DesignNo,
+		ApplyNo:        m_data.ApplyNo,
+		Remark:         m_data.Remark,
+		CreateType:     m_data.CreateType,
+		Type:           m_data.Type, //  内装材料,    幕墙面材,    幕墙辅材,    幕墙线材
 		PlatformKey:    platform.PlatformKey,
-		PlatformUid:    e.ToString(utils.SnakeGetMap("platform_uid", m_data)),
-		PlatformId:     e.ToString(utils.SnakeGetMap("platform_id", m_data)), //处理对应id
+		PlatformUid:    m_data.PlatformUid,
+		PlatformId:     m_data.PlatformId, //处理对应id
 		ProjectId:      project.Id,
 		CompanyId:      project.CompanyId,
-		ContractId:     e.ToInt64(utils.SnakeGetMap("contract_id", m_data)), //合同id
-		//BeginTime:      m_data.BeginTime,
+		ContractId:     m_data.ContractId, //合同id
+		BeginTime:      m_data.BeginTime,
 	}
 	models.MaterialAddT(&mm, &t)
 
@@ -168,13 +165,13 @@ func ProductSync(m_data map[string]interface{}, data []map[string]interface{}, p
 		for i, v := range data {
 			log.Println(i, v)
 			//检测数据是否正常
-			validate_item.Required(e.ToString(utils.SnakeGetMap("material_name", v)), "MaterialName").Message("请输入材料名称")
-			validate_item.Required(e.ToFloat64(utils.SnakeGetMap("price", v)), "TotalAmount").Message("请输入正确的材料单价")
-			validate_item.Required(e.ToFloat64(utils.SnakeGetMap("count", v)), "Count").Message("请输入正确的数量")
-			validate_item.Required(e.ToFloat64(utils.SnakeGetMap("company_id", v)), "ContractCount").Message("请输入正确的合同数量")
-			validate_item.Required(e.ToInt64(utils.SnakeGetMap("project_id", v)), "ProjectId").Message("项目有误")
-			validate_item.Required(e.ToInt64(utils.SnakeGetMap("platform_id", v)), "PlatformId").Message("请输入id")
-			validate_item.Required(e.ToString(utils.SnakeGetMap("unit", v)), "Unit").Message("请输入单位")
+			validate_item.Required(e.ToString(v["material_name"]), "MaterialName").Message("请输入材料名称")
+			validate_item.Required(e.ToFloat64(v["price"]), "TotalAmount").Message("请输入正确的材料单价")
+			validate_item.Required(e.ToFloat64(v["count"]), "Count").Message("请输入正确的数量")
+			validate_item.Required(e.ToFloat64(v["company_id"]), "ContractCount").Message("请输入正确的合同数量")
+			validate_item.Required(e.ToInt64(v["project_id"]), "ProjectId").Message("项目有误")
+			validate_item.Required(e.ToInt64(v["platform_id"]), "PlatformId").Message("请输入id")
+			validate_item.Required(e.ToString(v["unit"]), "Unit").Message("请输入单位")
 			//第一层表单验证
 			if valid.HasErrors() {
 				app.MarkErrors(valid.Errors)
@@ -188,49 +185,47 @@ func ProductSync(m_data map[string]interface{}, data []map[string]interface{}, p
 			data[i]["company_id"] = project.CompanyId
 
 			//判断产品是否存在
-			p_item, err := models.ProductCheckInfo(e.ToString(utils.SnakeGetMap("material_name", data[i])),
-				e.ToString(utils.SnakeGetMap("standard", data[i])), project.Id)
+			p_item, err := models.ProductCheckInfo(e.ToString(data[i]["material_name"]), e.ToString(data[i]["standard"]), project.Id)
 			productModel := models.Product{}
 			if err != nil {
 				// 处理新增数据结构
-
 				productModel = models.Product{
 					Model:              models.Model{},
-					MaterialName:       e.ToString(utils.SnakeGetMap("material_name", data[i])),
-					BlankingAttachment: e.ToString(utils.SnakeGetMap("blanking_attachment", data[i])),
-					Attachment:         e.ToString(utils.SnakeGetMap("attachment", data[i])),
-					InstallMap:         e.ToString(utils.SnakeGetMap("install_map", data[i])),
-					Price:              e.ToFloat64(utils.SnakeGetMap("price", data[i])),
-					Count:              e.ToFloat64(utils.SnakeGetMap("count", data[i])),
-					ContractCount:      e.ToFloat64(utils.SnakeGetMap("contract_count", data[i])),
+					MaterialName:       e.ToString(data[i]["material_name"]),
+					BlankingAttachment: e.ToString(data[i]["blanking_attachment"]),
+					Attachment:         e.ToString(data[i]["attachment"]),
+					InstallMap:         e.ToString(data[i]["install_map"]),
+					Price:              e.ToFloat64(data[i]["price"]),
+					Count:              e.ToFloat64(data[i]["count"]),
+					ContractCount:      e.ToFloat64(data[i]["contract_count"]),
 					PackCount:          0,
 					SendCount:          0,
 					ReturnCount:        0,
 					ReceiveCount:       0,
-					Unit:               e.ToString(utils.SnakeGetMap("unit", data[i])),
+					Unit:               e.ToString(data[i]["unit"]),
 					ProjectId:          project.Id,
 					ProjectName:        project.ProjectName,
 					ReplenishmentFlag:  0,
 					ProductSubFlag:     0,
 					ConfigData:         "[]",
-					AppendAttachment:   e.ToString(utils.SnakeGetMap("append_attachment", data[i])),
+					AppendAttachment:   e.ToString(data[i]["append_attachment"]),
 					//ProjectMaterialId:   data[i].ProjectMaterialId,
 					//AdminMaterialInfoId: "",
-					ProjectAdditional: e.ToString(utils.SnakeGetMap("project_additional", data[i])),
-					Remark:            e.ToString(utils.SnakeGetMap("remark", data[i])),
-					Length:            e.ToFloat64(utils.SnakeGetMap("length", data[i])),
-					Width:             e.ToFloat64(utils.SnakeGetMap("width", data[i])),
-					Height:            e.ToFloat64(utils.SnakeGetMap("height", data[i])),
-					Location:          e.ToString(utils.SnakeGetMap("location", data[i])),
-					Standard:          e.ToString(utils.SnakeGetMap("standard", data[i])),
+					ProjectAdditional: e.ToString(data[i]["project_additional"]),
+					Remark:            e.ToString(data[i]["remark"]),
+					Length:            e.ToFloat64(data[i]["length"]),
+					Width:             e.ToFloat64(data[i]["width"]),
+					Height:            e.ToFloat64(data[i]["height"]),
+					Location:          e.ToString(data[i]["location"]),
+					Standard:          e.ToString(data[i]["standard"]),
 					ArriveDate:        utils.Time{},
 					Cuid:              0,
 					CompanyId:         project.CompanyId,
-					SupplyCycle:       e.ToInt64(utils.SnakeGetMap("supply_cycle", data[i])),
+					SupplyCycle:       e.ToInt64(data[i]["supply_cycle"]),
 					MaterialId:        mm.Id,
 					PlatformKey:       platform.PlatformKey,
 					PlatformUid:       mm.PlatformUid,
-					PlatformId:        e.ToString(utils.SnakeGetMap("platform_id", data[i])),
+					PlatformId:        e.ToString(data[i]["platform_id"]),
 					ContractId:        mm.ContractId,
 				}
 				err = models.ProductAddT(&productModel, &t)
@@ -324,7 +319,7 @@ func ProductSync(m_data map[string]interface{}, data []map[string]interface{}, p
 				case models.P幕墙线材:
 					lm := models.ProductLinkWire{
 						SurfaceTreatment: e.ToString(utils.SnakeGetMap("surface_treatment", link_data)),
-						Color:            e.ToString(utils.SnakeGetMap("material_color", link_data)),
+						Color:            e.ToString(utils.SnakeGetMap("color", link_data)),
 						Area:             e.ToString(utils.SnakeGetMap("area", link_data)),
 						TotalCount:       e.ToString(utils.SnakeGetMap("total_count", link_data)),
 						ProductId:        productModel.Id,
@@ -354,7 +349,7 @@ func ProductSync(m_data map[string]interface{}, data []map[string]interface{}, p
 		}
 	} else {
 		// 材料没有的情况
-		return nil, errors.New("材料为空")
+		return nil,errors.New("材料为空")
 	}
 	t.Commit()
 	return struct {

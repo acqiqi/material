@@ -9,6 +9,39 @@ import (
 	"time"
 )
 
+func SendList(c *gin.Context) {
+	user_info, _ := c.Get("user_info")
+	maps := utils.WhereToMap(nil)
+	maps["flag"] = 1
+	maps["cuid"] = user_info.(models.Users).Cuid
+	project_list, err := models.ReceiverUsersGetLists(0, 999, utils.BuildWhere(maps))
+	if err != nil {
+		e.ApiErr(c, "获取失败")
+		return
+	}
+	ids := make([]int64, len(project_list))
+	for i, v := range project_list {
+		ids[i] = v.ProjectId
+	}
+
+	send_maps := utils.WhereToMap(nil)
+	send_maps["flag"] = 1
+	send_maps["project_id__in"] = ids
+	send_maps["status"] = 0
+	send_list, err := models.SendGetLists(0, 999, utils.BuildWhere(send_maps))
+	if err != nil {
+		e.ApiErr(c, "获取失败")
+		return
+	}
+
+	e.ApiOk(c, "获取成功", struct {
+		Lists interface{} `json:"lists"`
+	}{
+		Lists: send_list,
+	})
+
+}
+
 func SendInfo(c *gin.Context) {
 	data := e.ApiId{}
 	if err := c.BindJSON(&data); err != nil {
@@ -193,8 +226,15 @@ func SendReceiver(c *gin.Context) {
 		"receive_attachment": utils.JsonEncode(data.ReceiveAttachment),
 		"receive_remark":     data.ReceiveRemark,
 		"status":             1,
+		"receive_mobile":     user_info.(models.Users).Mobile,
 	}, &t)
 
-	t.Commit()
+	//t.Commit()
+
+	s, _ := models.SendGetInfoT(send.Id, &t)
+	if err := send_service.SyncCallback(*s); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
 	e.ApiOk(c, "操作成功", e.GetEmptyStruct())
 }

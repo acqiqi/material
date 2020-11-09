@@ -73,6 +73,8 @@ func HttpPostJson(url string, body interface{}, cb interface{}) error {
 	if resp.StatusCode != 200 {
 		return errors.New(string(b))
 	}
+	strs := string(b)
+	log.Println(strs)
 	log.Println(string(b))
 	return JsonDecode(string(b), &cb)
 }

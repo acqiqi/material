@@ -397,3 +397,12 @@ func MaterialSelect(c *gin.Context) {
 	e.ApiOk(c, "获取成功", lists)
 	return
 }
+
+func PartsList(c *gin.Context) {
+	data := e.ApiId{}
+	if err := c.BindJSON(&data); err != nil {
+		e.ApiErr(c, err.Error())
+		return
+	}
+
+}

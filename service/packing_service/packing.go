@@ -169,11 +169,16 @@ func Delete(id int64, company_id int64) error {
 		return errors.New("非法请求")
 	}
 
+	if packing.Status != 0 {
+		return errors.New("当前状态已发货无法解包")
+	}
+
 	//查询对应的材料
 	maps := utils.WhereToMap(nil)
 	maps["flag"] = 1
 	maps["company_id"] = company_id
 	maps["packing_id"] = packing.Id
+
 	pp, err := ApiListsPP(utils.BuildWhere(maps))
 	if err != nil {
 		return errors.New("材料数据有误")

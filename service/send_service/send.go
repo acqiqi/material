@@ -102,7 +102,9 @@ func Add(data SendAdd, links []*models.Packing) (*models.Send, error) {
 	}
 	t.Commit()
 
-	go SyncCallback(model)
+	s_data, _ := models.SendGetInfoT(model.Id, &t)
+	//log.Println(err)
+	SyncCallback(*s_data)
 	return &model, nil
 }
 
@@ -164,14 +166,16 @@ func SyncCallback(send models.Send) error {
 	//创建Send信息
 	send_data := make(map[string]interface{})
 	send_data["id"] = send.Id
-	send_data["send_no"] = send.SendNo                 // 订单编号
-	send_data["count"] = send.Count                    // 发货总数
-	send_data["remark"] = send.Remark                  // 发货备注
-	send_data["express_no"] = send.ExpressNo           // 快递单号
-	send_data["return_count"] = send.ReturnCount       // 退货数量
-	send_data["receive_count"] = send.ReceiveCount     // 接收数量
-	send_data["actual_receiver"] = send.ActualReceiver // 签收人
-	send_data["receive_remark"] = send.ReceiveRemark   //收货备注
+	send_data["send_no"] = send.SendNo                       // 订单编号
+	send_data["count"] = send.Count                          // 发货总数
+	send_data["remark"] = send.Remark                        // 发货备注
+	send_data["express_no"] = send.ExpressNo                 // 快递单号
+	send_data["return_count"] = send.ReturnCount             // 退货数量
+	send_data["receive_count"] = send.ReceiveCount           // 接收数量
+	send_data["actual_receiver"] = send.ActualReceiver       // 签收人
+	send_data["receive_remark"] = send.ReceiveRemark         //收货备注
+	send_data["receive_attachment"] = send.ReceiveAttachment //收件人附件
+	send_data["receive_mobile"] = send.ReceiveMobile         //手机号
 	var ar []string
 	if err := utils.JsonDecode(send.ReceiveAttachment, &ar); err == nil {
 		send_data["receive_attachment"] = ar // 附件
@@ -199,10 +203,12 @@ func SyncCallback(send models.Send) error {
 	}
 	send_data["product_list"] = product_list
 
+	str := utils.JsonEncode(send_data)
+	log.Println(str)
 	callback := e.HttpCallbackData{
 		Code:        0,
 		Msg:         "Send Success",
-		Action:      e.PLATFORT_ACTION_SEND,
+		Action:      e.PLATFORT_ACTION_SEND_RECEIVER,
 		CallbackUrl: platform.MessageCallbackUrl,
 		Data:        send_data,
 	}

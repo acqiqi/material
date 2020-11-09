@@ -145,6 +145,7 @@ func InitRouter() *gin.Engine {
 		apiSmallV1.POST("/packing_info", small_v1.PackingInfo)                             //打包详情
 		apiSmallV1.POST("/product_info", small_v1.ProductInfo)                             //产品详情
 		apiSmallV1.POST("/send_info", small_v1.SendInfo)                                   //产品详情
+		apiSmallV1.POST("/send_list", small_v1.SendList)                                   //产品列表
 		apiSmallV1.POST("/send_receiver_info", small_v1.SendReceiverInfo)                  //确认收货详情
 		apiSmallV1.POST("/packing_product_return_info", small_v1.PackingProductReturnInfo) //退货详情
 		apiSmallV1.POST("/packing_product_info", small_v1.PackingProductInfo)              //打包产品详情

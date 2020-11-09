@@ -30,12 +30,21 @@ type Send struct {
 	IsSync      int    `json:"is_sync"`      // 是否同步 如果platform存在就需要同步
 	PlatformKey string `json:"platform_key"` // 平台key
 
+	ReceiveMobile string `json:"receive_mobile"`
 }
 
 // 发货详情
 func SendGetInfo(id int64) (*Send, error) {
 	var d Send
 	err := db.Where("id = ? AND flag = 1", id).Preload("Company").Preload("Packing").Preload("Project").First(&d).Error
+	if err != nil {
+		return &Send{}, err
+	}
+	return &d, nil
+}
+func SendGetInfoT(id int64, t *gorm.DB) (*Send, error) {
+	var d Send
+	err := t.Where("id = ? AND flag = 1", id).Preload("Company").Preload("Packing").Preload("Project").First(&d).Error
 	if err != nil {
 		return &Send{}, err
 	}

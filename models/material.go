@@ -33,7 +33,7 @@ type Material struct {
 	ReceiveTime utils.Time `json:"receive_time"` //接收时间
 	IsReceive   int64      `json:"is_receive"`   //是否接收
 
-	MaterialLinkId int64 `json:"material_link_id"` //下料单链接id
+	//MaterialLinkId int64 `json:"material_link_id"` //下料单链接id
 }
 
 // 三方检测是否存在
