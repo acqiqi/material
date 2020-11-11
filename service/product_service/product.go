@@ -191,7 +191,7 @@ func ProductSync(m_data map[string]interface{}, data []map[string]interface{}, p
 			p_item, err := models.ProductCheckInfo(e.ToString(utils.SnakeGetMap("material_name", data[i])),
 				e.ToString(utils.SnakeGetMap("standard", data[i])), project.Id)
 			productModel := models.Product{}
-			if err != nil {
+			if true {
 				// 处理新增数据结构
 
 				productModel = models.Product{

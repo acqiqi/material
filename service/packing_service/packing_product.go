@@ -47,16 +47,23 @@ func SyncGetListPP(packing_id int64) ([]map[string]interface{}, error) {
 	cb_list := make([]map[string]interface{}, len(list))
 	for i, v := range list {
 		cb_list[i] = map[string]interface{}{
-			"id":            v.Id,
-			"product_id":    v.Product.Id,
-			"platform_key":  v.Product.PlatformKey,  //平台key
-			"platform_id":   v.Product.PlatformId,   //平台id
-			"platform_uid":  v.Product.PlatformUid,  //平台uid
-			"material_name": v.Product.MaterialName, //材料名称
-			"standard":      v.Product.Standard,     //规格
-			"count":         v.Count,                //打包数量
-			"return_count":  v.ReturnCount,          //退货
-			"receive_count": v.ReceiveCount,         //接收数量
+			"id":                  v.Id,
+			"product_id":          v.Product.Id,
+			"platform_key":        v.Product.PlatformKey,  //平台key
+			"platform_id":         v.Product.PlatformId,   //平台id
+			"platform_uid":        v.Product.PlatformUid,  //平台uid
+			"material_name":       v.Product.MaterialName, //材料名称
+			"standard":            v.Product.Standard,     //规格
+			"product_total_count": v.Product.Count,        //下料总数
+			"count":               v.Count,                //打包数量
+			"return_count":        v.ReturnCount,          //退货
+			"receive_count":       v.ReceiveCount,         //接收数量
+			"width":               v.Product.Width,
+			"height":              v.Product.Height,
+			"length":              v.Product.Length,
+			"unit":                v.Product.Unit,
+			"price":               v.Product.Price,
+			"remark":              v.Product.Remark,
 		}
 	}
 	return cb_list, nil

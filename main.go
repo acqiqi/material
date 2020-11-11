@@ -26,13 +26,6 @@ func init() {
 	//utils.PDFT()
 	log.Println(utils.FormatCamelString("asd_asd", false))
 
-	mk := make(map[string]interface{})
-	mk["mdzz"] = 123
-	if mk["mdzz1"] == nil {
-		log.Println("mdaz")
-	} else {
-		log.Println("ok")
-	}
 }
 
 func main() {

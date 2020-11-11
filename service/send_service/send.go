@@ -13,6 +13,7 @@ import (
 	"material/models"
 	"material/service/packing_service"
 	"strconv"
+	"strings"
 )
 
 // 发货表
@@ -178,7 +179,7 @@ func SyncCallback(send models.Send) error {
 	send_data["receive_mobile"] = send.ReceiveMobile         //手机号
 	var ar []string
 	if err := utils.JsonDecode(send.ReceiveAttachment, &ar); err == nil {
-		send_data["receive_attachment"] = ar // 附件
+		send_data["receive_attachment"] = strings.Join(ar, ",") // 附件
 	}
 
 	//处理打包信息
@@ -201,10 +202,8 @@ func SyncCallback(send models.Send) error {
 			}
 		}
 	}
-	send_data["product_list"] = product_list
+	send_data["product_list"] = utils.JsonEncode(product_list)
 
-	str := utils.JsonEncode(send_data)
-	log.Println(str)
 	callback := e.HttpCallbackData{
 		Code:        0,
 		Msg:         "Send Success",
@@ -213,6 +212,9 @@ func SyncCallback(send models.Send) error {
 		Data:        send_data,
 	}
 	c_data := new(e.HttpCallbackData)
+
+	str := utils.JsonEncode(callback)
+	log.Println(str)
 	if err := callback.RequestCallback(&c_data); err != nil {
 		return err
 	}

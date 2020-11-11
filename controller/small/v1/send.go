@@ -229,8 +229,7 @@ func SendReceiver(c *gin.Context) {
 		"receive_mobile":     user_info.(models.Users).Mobile,
 	}, &t)
 
-	//t.Commit()
-
+	t.Commit()
 	s, _ := models.SendGetInfoT(send.Id, &t)
 	if err := send_service.SyncCallback(*s); err != nil {
 		e.ApiErr(c, err.Error())
