@@ -58,7 +58,7 @@ func MaterialAddT(material *Material, t *gorm.DB) error {
 }
 
 func MaterialEditT(id int64, data interface{}, t *gorm.DB) error {
-	if err := t.Model(&Material{}).Where("id = ? AND flag = 1 ", id).Updates(data).Error; err != nil {
+	if err := t.Model(&Material{}).Where("id = ? AND flag = 1 ", id).Order("id desc").Updates(data).Error; err != nil {
 		return err
 	}
 	return nil
