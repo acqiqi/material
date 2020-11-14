@@ -43,6 +43,5 @@ type PlatformPRCreateCallback struct {
 
 // 实现回调
 func (d *HttpCallbackData) RequestCallback(cb interface{}) error {
-	cb_str := utils.JsonEncode(d)
-	return utils.HttpPostJson(d.CallbackUrl, cb_str, &cb)
+	return utils.HttpPostJson(d.CallbackUrl, d, &cb)
 }

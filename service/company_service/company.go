@@ -1,7 +1,10 @@
 package company_service
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"github.com/astaxie/beego/validation"
+	uuid "github.com/satori/go.uuid"
 	"log"
 	"material/lib/app"
 	"material/lib/e"
@@ -23,6 +26,8 @@ type CompanyAdd struct {
 	DeletedAt  string   `json:"deleted_at"`
 	CompanyKey string   `json:"company_key"` //企业Key
 	BindState  int      `json:"bind_state"`  //是否绑定 0否 1是
+	Ak         string   `json:"ak"`
+	Sk         string   `json:"sk"`
 }
 
 //新增企业
@@ -51,6 +56,14 @@ func Add(data *CompanyAdd) (*models.Company, error) {
 	model.VipEndTime = 0
 	model.Status = 1
 	model.CompanyKey = models.CompanyGetKey()
+
+	h := md5.New()
+	h.Write([]byte(uuid.NewV4().String()))
+	ak := hex.EncodeToString(h.Sum(nil))
+	model.Ak = ak
+	sk := uuid.NewV4().String()
+	model.Sk = sk
+
 	if err := models.CompanyAdd(&model); err != nil {
 		return nil, err
 	}

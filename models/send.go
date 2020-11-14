@@ -31,6 +31,7 @@ type Send struct {
 	PlatformKey string `json:"platform_key"` // 平台key
 
 	ReceiveMobile string `json:"receive_mobile"`
+	Title         string `json:"title"`
 }
 
 // 发货详情

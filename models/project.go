@@ -38,6 +38,7 @@ type Project struct {
 
 	ReceiverAddress string `json:"receiver_address"` //收货地址
 
+	SupplierId string `json:"supplier_id"`
 }
 
 func ProjectGetInfo(id int64) (*Project, error) {

@@ -36,6 +36,8 @@ type SendAdd struct {
 
 	IsSync      int    `json:"is_sync"`      // 是否同步 如果platform存在就需要同步
 	PlatformKey string `json:"platform_key"` // 平台key
+
+	Title string `json:"title"`
 }
 
 // 获取Api列表
@@ -64,6 +66,7 @@ func Add(data SendAdd, links []*models.Packing) (*models.Send, error) {
 		ExpressNo:   data.Express,
 		PlatformKey: data.PlatformKey,
 		IsSync:      0,
+		Title:       data.Title,
 	}
 	//创建事务
 	t := *models.NewTransaction()
@@ -105,7 +108,7 @@ func Add(data SendAdd, links []*models.Packing) (*models.Send, error) {
 
 	s_data, _ := models.SendGetInfoT(model.Id, &t)
 	//log.Println(err)
-	SyncCallback(*s_data)
+	SyncCallback(*s_data, false)
 	return &model, nil
 }
 
@@ -157,7 +160,7 @@ func QrcodeBuild(send models.Send) (string, error) {
 }
 
 // 同步发货
-func SyncCallback(send models.Send) error {
+func SyncCallback(send models.Send, is_r bool) error {
 	//查询平台是否存在
 	platform, err := models.PlatformGetInfoOrKey(send.PlatformKey)
 	if err != nil {
@@ -204,10 +207,17 @@ func SyncCallback(send models.Send) error {
 	}
 	send_data["product_list"] = utils.JsonEncode(product_list)
 
+	action := ""
+	if is_r {
+		action = e.PLATFORT_ACTION_SEND_RECEIVER
+	} else {
+		action = e.PLATFORT_ACTION_SEND
+	}
+
 	callback := e.HttpCallbackData{
 		Code:        0,
 		Msg:         "Send Success",
-		Action:      e.PLATFORT_ACTION_SEND_RECEIVER,
+		Action:      action,
 		CallbackUrl: platform.MessageCallbackUrl,
 		Data:        send_data,
 	}

@@ -171,6 +171,7 @@ func AutoLogin(c *gin.Context) {
 			Nickname: user_info.Data.UserInfo.Nickname,
 			Avatar:   user_info.Data.UserInfo.Avatar,
 			MUserKey: models.GetMUserKey(),
+			Mobile:   data.Mobile,
 		}
 		if err := models.AddUsers(&user_model); err != nil {
 			e.ApiErr(c, err.Error())

@@ -19,7 +19,8 @@ type Company struct {
 	VipEndTime int    `json:"vip_end_time"` // 到期时间
 	Status     int    `json:"status"`       // 状态 0 停业  1营业 -1停用
 	CompanyKey string `json:"company_key"`  //企业Key
-
+	Ak         string `json:"ak"`
+	Sk         string `json:"sk"`
 }
 
 func CompanyGetInfo(id int64) (*Company, error) {

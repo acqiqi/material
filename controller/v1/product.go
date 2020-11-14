@@ -94,7 +94,13 @@ func MaterialReceive(c *gin.Context) {
 	t := *models.NewTransaction()
 	m.IsReceive = 1
 	m.ReceiveTime = utils.Time{Time: time.Now()}
-	if err := models.MaterialEditT(m.Id, m, &t); err != nil {
+
+	mmap := map[string]interface{}{
+		"is_receive":   1,
+		"receive_time": time.Now(),
+	}
+
+	if err := models.MaterialEdit(m.Id, mmap); err != nil {
 		e.ApiErr(c, "接收失败")
 		t.Rollback()
 		return

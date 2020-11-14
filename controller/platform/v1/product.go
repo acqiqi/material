@@ -2,7 +2,9 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"material/lib/e"
+	"material/lib/utils"
 	"material/models"
 	"material/service/product_service"
 )
@@ -32,11 +34,15 @@ func MaterialSync(c *gin.Context) {
 		return
 	}
 
+	d_str := utils.JsonEncode(data)
+	log.Println(d_str)
+
 	platform, _ := c.Get("platform")
 
 	cb, err := product_service.ProductSync(data.MData, data.PData, platform.(models.Platform))
 	if err != nil {
 		e.ApiErr(c, err.Error())
+		log.Println(err.Error())
 		return
 	}
 	e.ApiOk(c, "操作成功", cb)

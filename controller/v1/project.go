@@ -176,7 +176,7 @@ func ProjectReceive(c *gin.Context) {
 		return
 	}
 
-	company_link, err := models.PlatformCompanyGetInfoCheck(company.(models.CompanyUsers).Company.Id, project.PlatformKey)
+	//company_link, err := models.PlatformCompanyGetInfoCheck(company.(models.CompanyUsers).Company.Id, project.PlatformKey)
 
 	//查询Platform
 	platform, err := models.PlatformGetInfoOrKey(project.PlatformKey)
@@ -198,7 +198,7 @@ func ProjectReceive(c *gin.Context) {
 				PlatformId:  project.PlatformId,
 				CreatedAt:   project.CreatedAt,
 				Status:      1,
-				SupplierId:  company_link.SupplierId,
+				SupplierId:  project.SupplierId,
 			},
 		}
 		c_data := new(e.HttpCallbackData)

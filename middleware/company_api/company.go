@@ -1,16 +1,14 @@
-package platform
+package company
 
 import (
 	"github.com/gin-gonic/gin"
 	"log"
+	"material/lib/e"
 	"material/lib/gredis"
 	"material/models"
-
-	"material/lib/e"
 )
 
-// JWT is jwt middleware
-func Platform() gin.HandlerFunc {
+func Company() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authentication")
 		if token == "" {
@@ -20,8 +18,6 @@ func Platform() gin.HandlerFunc {
 			platform_key := ""
 			if token == "MLGZ_ZJSZ" {
 				platform_key = "MLGZ_ZJSZ"
-			} else if token == "MLGZ_ZJSZCS" {
-				platform_key = "MLGZ_ZJSZCS"
 			} else {
 				//检测Token
 				platform_key = gredis.GetCacheString("PLATFORM" + token)

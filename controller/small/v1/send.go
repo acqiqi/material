@@ -143,10 +143,10 @@ func SendReceiver(c *gin.Context) {
 		return
 	}
 
-	if data.ReceiveRemark == "" {
-		e.ApiErr(c, "请输入收货信息")
-		return
-	}
+	//if data.ReceiveRemark == "" {
+	//	e.ApiErr(c, "请输入收货信息")
+	//	return
+	//}
 	if len(data.ReceiveAttachment) == 0 {
 		e.ApiErr(c, "请上传收货附件")
 		return
@@ -228,10 +228,10 @@ func SendReceiver(c *gin.Context) {
 		"status":             1,
 		"receive_mobile":     user_info.(models.Users).Mobile,
 	}, &t)
-
-	t.Commit()
 	s, _ := models.SendGetInfoT(send.Id, &t)
-	if err := send_service.SyncCallback(*s); err != nil {
+	t.Commit()
+
+	if err := send_service.SyncCallback(*s, true); err != nil {
 		e.ApiErr(c, err.Error())
 		return
 	}

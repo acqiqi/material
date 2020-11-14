@@ -35,6 +35,7 @@ type ProjectAdd struct {
 	IsPlatform        int     `json:"is_platform"`        // 是否三方平台同步
 
 	ReceiverAddress string `json:"receiver_address"` //收货地址
+	SupplierId      string `json:"supplier_id"`
 }
 
 var state = map[int]string{
@@ -107,6 +108,7 @@ func Add(data *ProjectAdd) (*models.Project, error) {
 	model.PlatformUid = data.PlatformUid
 	model.IsPlatform = data.IsPlatform
 	model.ReceiverAddress = data.ReceiverAddress
+	model.SupplierId = data.SupplierId
 	if err := models.ProjectAdd(&model); err != nil {
 		return nil, err
 	}

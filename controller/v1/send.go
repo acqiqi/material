@@ -93,7 +93,7 @@ func SendSync(c *gin.Context) {
 	}
 
 	// 处理Callback
-	if err := send_service.SyncCallback(*info); err != nil {
+	if err := send_service.SyncCallback(*info, false); err != nil {
 		e.ApiErr(c, err.Error())
 		return
 	}
@@ -107,6 +107,11 @@ func SendCreate(c *gin.Context) {
 	}{}
 	if err := c.BindJSON(&data); err != nil {
 		e.ApiErr(c, err.Error())
+		return
+	}
+
+	if data.Send.Title == "" {
+		e.ApiErr(c, "请输入发货标题")
 		return
 	}
 
