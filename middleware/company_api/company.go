@@ -10,33 +10,36 @@ import (
 
 func Company() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		log.Println("Company_Middleware")
 		token := c.GetHeader("Authentication")
 		if token == "" {
 			e.ApiOpt(c, e.INVALID_PARAMS, e.GetMsg(e.INVALID_PARAMS), e.GetEmptyStruct())
 			return
 		} else {
-			platform_key := ""
-			if token == "MLGZ_ZJSZ" {
-				platform_key = "MLGZ_ZJSZ"
-			} else {
-				//检测Token
-				platform_key = gredis.GetCacheString("PLATFORM" + token)
-				if platform_key == "" {
-					e.ApiOpt(c, e.ERROR_AUTH_CHECK_TOKEN_TIMEOUT, e.GetMsg(e.ERROR_AUTH_CHECK_TOKEN_TIMEOUT), e.GetEmptyStruct())
-					return
-				}
+			//检测Token
+			comapny_ak := gredis.GetCacheString("COMPANY_API" + token)
+			if comapny_ak == "" {
+				e.ApiOpt(c, e.ERROR_AUTH_CHECK_TOKEN_TIMEOUT, e.GetMsg(e.ERROR_AUTH_CHECK_TOKEN_TIMEOUT), e.GetEmptyStruct())
+				return
 			}
-			log.Println(platform_key)
-			platform, err := models.PlatformGetInfoOrKey(platform_key)
+			log.Println(comapny_ak)
+			company, err := models.CompanyGetInfoOrAk(comapny_ak)
 			if err != nil {
 				log.Println(err)
 				e.ApiOpt(c, e.ERROR_AUTH, e.GetMsg(e.ERROR_AUTH), e.GetEmptyStruct())
 				return
 			}
-			c.Set("platform", *platform)
-			c.Set("platform_key", platform_key)
-		}
 
+			user_company, err := models.CompanyUsersGetInfoOrIdUid(company.Id, int64(company.Cuid))
+			if err != nil {
+				log.Println(err)
+				e.ApiOpt(c, e.ERROR_AUTH, "用户数据有误！", e.GetEmptyStruct())
+				return
+			}
+			c.Set("company", *user_company)
+			user, err := models.GetUsersInfoCuid(int64(company.Cuid))
+			c.Set("user_info", *user)
+		}
 		c.Next()
 	}
 }

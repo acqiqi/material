@@ -157,9 +157,58 @@ func Edit(data *ProjectAdd) (*models.Project, error) {
 }
 
 // 获取Api列表
-func ApiLists(page int, limit int, maps string) ([]*models.Project, error) {
+func ApiLists(page int, limit int, maps string) ([]map[string]interface{}, error) {
 	offset := (page - 1) * limit
-	return models.ProjectGetLists(offset, limit, maps)
+	list, err := models.ProjectGetLists(offset, limit, maps)
+	if err != nil {
+		return []map[string]interface{}{}, err
+	}
+	cb := make([]map[string]interface{}, len(list))
+	for i, v := range list {
+		cb_item := map[string]interface{}{
+			"id":           v.Id,
+			"created_at":   v.CreatedAt,
+			"updated_at":   v.UpdatedAt,
+			"flag":         v.Flag,
+			"project_name": v.ProjectName,
+			"state":        v.State,
+			"remark":       v.Remark,
+			"cuid":         v.Cuid,
+			"company_id":   v.CompanyId,
+			"company": map[string]interface{}{
+				"id":          v.Company.Id,
+				"created_at":  v.Company.CreatedAt,
+				"updated_at":  v.Company.UpdatedAt,
+				"flag":        v.Company.Flag,
+				"name":        v.Company.Name,
+				"mobile":      v.Company.Mobile,
+				"tel":         v.Company.Tel,
+				"address":     v.Company.Address,
+				"desc":        v.Company.Desc,
+				"auth_pics":   v.Company.AuthPics,
+				"company_key": v.Company.CompanyKey,
+			},
+			"append_attachment":  v.AppendAttachment,
+			"receiver_members":   v.ReceiverMembers,
+			"bind_state":         v.BindState,
+			"bind_type":          v.BindType,
+			"data_origin":        v.DataOrigin,
+			"project_account":    v.ProjectAccount,
+			"supplier_accountid": v.SupplierAccountid,
+			"project_accountid":  v.ProjectAccountid,
+			"contract_money":     v.ContractMoney,
+			"received_money":     v.ReceivedMoney,
+			"receipt_money":      v.ReceiptMoney,
+			"status":             v.Status,
+			"platform_key":       v.PlatformKey,
+			"platform_uid":       v.PlatformUid,
+			"platform_id":        v.PlatformId,
+			"is_platform":        v.IsPlatform,
+			"receive_time":       v.ReceiveTime,
+		}
+		cb[i] = cb_item
+	}
+	return cb, nil
 }
 
 type ProjectSelectData struct {

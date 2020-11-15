@@ -27,13 +27,3 @@ func PlatformGetInfoOrKey(key string) (*Platform, error) {
 	}
 	return &platform, nil
 }
-
-// 利用Ak 获取平台详情
-func PlatformGetInfoOrAk(key string) (*Platform, error) {
-	var platform Platform
-	err := db.Where("ak = ? AND flag =1", key).First(&platform).Error
-	if err != nil {
-		return &Platform{}, err
-	}
-	return &platform, nil
-}

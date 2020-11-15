@@ -3,14 +3,13 @@ package app_middleware
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 )
 
 // 处理跨域请求,支持options访问
 func App() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log.Println("Init All")
+		//log.Println("Init All")
 		method := c.Request.Method
 		fmt.Println(method)
 		c.Header("Access-Control-Allow-Origin", "*")

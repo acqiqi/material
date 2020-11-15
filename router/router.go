@@ -8,6 +8,7 @@ import (
 	"material/lib/setting"
 	"material/middleware/app_middleware"
 	"material/middleware/company"
+	m_company_api "material/middleware/company_api"
 	"material/middleware/platform"
 	"material/middleware/small"
 	"net/http"
@@ -115,75 +116,20 @@ func InitRouter() *gin.Engine {
 			apiv2.POST("/pr_create", v1.PrCreate)          //请款
 			apiv2.POST("/pr_list", v1.PrList)              //请款列表
 		}
-		comapny_api := apiv1.Group("/company_api")
-		comapny_api.Use(company.Company())
-		{
-			// 控制台
-			comapny_api.POST("/dashboard_home", v1.DashboardHome)       //控制台首页
-			comapny_api.POST("/dashboard_account", v1.DashboardAccount) //控制台首页
 
-			// 项目
-			comapny_api.POST("/project_list", v1.ProjectList)       //获取项目列表
-			comapny_api.POST("/project_create", v1.ProjectCreate)   //创建项
-			comapny_api.POST("/project_edit", v1.ProjectEdit)       //编辑项目
-			comapny_api.POST("/project_select", v1.ProjectSelect)   //获取Select
-			comapny_api.POST("/project_receive", v1.ProjectReceive) //接收项目
-			comapny_api.POST("/project_info", v1.ProjectInfo)       //项目详情
-
-			// 合同
-			comapny_api.POST("/contract_create", v1.ContractCreate) //创建合同
-			comapny_api.POST("/contract_edit", v1.ContractEdit)     //编辑合同
-			comapny_api.POST("/contract_list", v1.ContractList)     //合同列表
-			comapny_api.POST("/contract_select", v1.ContractSelect) //合同select
-			comapny_api.POST("/contract_info", v1.ContractInfo)     //合同详情
-
-			//产品 材料
-			comapny_api.POST("/product_class_list", v1.ProductClassList)     //材料类型列表
-			comapny_api.POST("/product_class_create", v1.ProductClassCreate) //新增材料类型
-			comapny_api.POST("/product_class_edit", v1.ProductClassEdit)     //编辑材料类型
-			comapny_api.POST("/product_class_delete", v1.ProductClassDelete) //删除材料类型
-
-			comapny_api.POST("/material_list", v1.MaterialList)       //下料单列表
-			comapny_api.POST("/material_info", v1.MaterialInfo)       //下料单详情
-			comapny_api.POST("/material_receive", v1.MaterialReceive) //接收下料单
-			comapny_api.POST("/material_select", v1.MaterialSelect)   //下料单Select
-
-			comapny_api.POST("/product_list", v1.ProductList)              //材料列表
-			comapny_api.POST("/return_product_list", v1.ReturnProductList) //退货列表
-			comapny_api.POST("/product_info", v1.ProductInfo)              //材料详情
-			comapny_api.POST("/product_table", v1.ProductTable)            //材料表格
-
-			//仓库
-			comapny_api.POST("/depository_create", v1.DepositoryCreate) //创建昂库
-			comapny_api.POST("/depository_edit", v1.DepositoryEdit)     //编辑仓库
-			comapny_api.POST("/depository_list", v1.DepositoryList)
-			comapny_api.POST("/depository_select", v1.DepositorySelect)
-
-			// 打包
-			comapny_api.POST("/packing_create", v1.PackingCreate) //打包入库
-			comapny_api.POST("/packing_list", v1.PackingList)
-			comapny_api.POST("/packing_delete", v1.PackingDelete)          //拆包
-			comapny_api.POST("/packing_table", v1.PackingTable)            //表格
-			comapny_api.POST("/packing_look_qrcode", v1.PackingLookQrcode) //查看二维码
-			comapny_api.POST("/packing_info", v1.PackingInfo)              //打包详情
-
-			//发货相关
-			comapny_api.POST("/send_create", v1.SendCreate)                    //发货
-			comapny_api.POST("/send_list", v1.SendList)                        //发货列表
-			comapny_api.POST("/send_info", v1.SendInfo)                        //发货列表
-			comapny_api.POST("/send_sync", v1.SendSync)                        //发货同步三方服务器
-			comapny_api.POST("/send_look_qrcode", v1.SendLookQrcode)           //发货二维码
-			comapny_api.POST("/send_return_info", v1.SendReturnInfo)           //退货详情
-			comapny_api.POST("/send_return_use", v1.SendReturnUse)             //接收退货
-			comapny_api.POST("/send_return_replenish", v1.SendReturnReplenish) //补货
-
-			// 请款相关
-			comapny_api.POST("/pr_type_select", v1.PrTypeSelect) //获取请款type
-			comapny_api.POST("/pr_check_price", v1.PrCheckPrice) //获取请款type
-			comapny_api.POST("/pr_create", v1.PrCreate)          //请款
-			comapny_api.POST("/pr_list", v1.PrList)
-		}
 	}
+	comapny_api := r.Group("/company_api/v1")
+	comapny_api.Use(m_company_api.Company())
+	{
+		// 项目
+		comapny_api.POST("/project_list", v1.ProjectList)       //获取项目列表
+		comapny_api.POST("/project_create", v1.ProjectCreate)   //创建项
+		comapny_api.POST("/project_edit", v1.ProjectEdit)       //编辑项目
+		comapny_api.POST("/project_select", v1.ProjectSelect)   //获取Select
+		comapny_api.POST("/project_receive", v1.ProjectReceive) //接收项目
+		comapny_api.POST("/project_info", v1.ProjectInfo)       //项目详情
+	}
+
 	apiPlatformV1 := r.Group("/platform_api/v1")
 	apiPlatformV1.Use(platform.Platform())
 	{

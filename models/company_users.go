@@ -44,6 +44,16 @@ func CompanyUsersGetInfoOrCompanyId(company_id int64) (*CompanyUsers, error) {
 	return &cu, nil
 }
 
+// 根据企业id 和用户id直接获取对应的数据
+func CompanyUsersGetInfoOrIdUid(company_id, cuid int64) (*CompanyUsers, error) {
+	var cu CompanyUsers
+	err := db.Where("company_id = ? AND cuid = ? AND flag = 1", company_id, cuid).Preload("Company").First(&cu).Error
+	if err != nil {
+		return &CompanyUsers{}, err
+	}
+	return &cu, nil
+}
+
 // 新增企业
 func CompanyUsersAdd(company_users *CompanyUsers) error {
 	company_users.Flag = 1

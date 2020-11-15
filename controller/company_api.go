@@ -1,4 +1,4 @@
-package platform
+package controller
 
 import (
 	"github.com/gin-gonic/gin"
@@ -26,20 +26,20 @@ func GetAccessTokenApi(c *gin.Context) {
 		return
 	}
 
-	platform, err := models.PlatformGetInfoOrAk(data.Ak)
+	company, err := models.CompanyGetInfoOrAk(data.Ak)
 	if err != nil {
 		e.ApiErr(c, "平台不存在")
 		return
 	}
 
 	//判断秘钥是否正确
-	if platform.Sk != data.Sk {
+	if company.Sk != data.Sk {
 		e.ApiErr(c, "非法请求")
 		return
 	}
 
 	token := uuid.NewV4().String()
-	gredis.SetCacheString("PLATFORM_API"+token, platform.PlatformKey, 7800000000)
+	gredis.SetCacheString("COMPANY_API"+token, company.Ak, 7800000000)
 
 	e.ApiOk(c, "登录成功", struct {
 		Token string `json:"token"`

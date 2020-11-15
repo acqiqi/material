@@ -41,6 +41,16 @@ func CompanyGetInfoOrKey(key string) (*Company, error) {
 	return &user, nil
 }
 
+// 利用Ak 获取平台详情
+func CompanyGetInfoOrAk(key string) (*Company, error) {
+	var platform Company
+	err := db.Where("ak = ? AND flag =1", key).First(&platform).Error
+	if err != nil {
+		return &Company{}, err
+	}
+	return &platform, nil
+}
+
 //获取我的主企业
 func CompanyGetUserList(cuid int64) ([]Company, error) {
 	var companys []Company
