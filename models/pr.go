@@ -95,7 +95,7 @@ func PrGetCount(company_id int64, begin_time, end_time time.Time) int {
 
 func PrGetSum(company_id int64, begin_time, end_time time.Time) float64 {
 	rows := db.Table("vhake_pr").Select("sum(price) as count").
-		Where("").Row()
+		Where("company_id = ?", company_id).Row()
 	var count float64
 	err := rows.Scan(&count)
 	if err != nil {
