@@ -25,7 +25,6 @@ func init() {
 	//utils.InitModel()
 	//utils.PDFT()
 	log.Println(utils.FormatCamelString("asd_asd", false))
-
 }
 
 func main() {
