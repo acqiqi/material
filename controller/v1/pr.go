@@ -57,7 +57,7 @@ func PrCreate(c *gin.Context) {
 	}
 	data.CompanyId = project.CompanyId
 	user_info, _ := c.Get("user_info")
-	data.Cuid = user_info.(models.Users).Id
+	data.Cuid = user_info.(models.Users).Cuid
 	if project.CompanyId != company.(models.CompanyUsers).Company.Id {
 		e.ApiErr(c, "非法请求")
 		return

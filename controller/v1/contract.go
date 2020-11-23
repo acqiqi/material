@@ -30,7 +30,7 @@ func ContractCreate(c *gin.Context) {
 	}
 	log.Println(data)
 	user_info, _ := c.Get("user_info")
-	data.Cuid = int(user_info.(models.Users).Id)
+	data.Cuid = int(user_info.(models.Users).Cuid)
 	company, _ := c.Get("company")
 	data.CompanyId = company.(models.CompanyUsers).Company.Id
 	data.BindState = 1

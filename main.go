@@ -7,7 +7,6 @@ import (
 	"material/lib/gredis"
 	"material/lib/logging"
 	"material/lib/setting"
-	"material/lib/utils"
 	"material/models"
 	"material/router"
 	_ "material/task"
@@ -24,7 +23,6 @@ func init() {
 	gredis.Setup()  // redis
 	//utils.InitModel()
 	//utils.PDFT()
-	log.Println(utils.FormatCamelString("asd_asd", false))
 }
 
 func main() {
@@ -46,5 +44,6 @@ func main() {
 
 	log.Printf("[info] start http server listening %s", endPoint)
 	log.Println(runtime.Version())
+	log.Println("2020-11-23 11:20:38")
 	server.ListenAndServe()
 }

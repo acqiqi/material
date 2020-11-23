@@ -12,7 +12,7 @@ import (
 // 获取用户信息
 func UsersGetInfo(c *gin.Context) {
 	user_info, _ := c.Get("user_info")
-	company_list, _ := models.CompanyUsersGetMyList(user_info.(models.Users).Id)
+	company_list, _ := models.CompanyUsersGetMyList(user_info.(models.Users).Cuid)
 	e.ApiOk(c, "获取成功", struct {
 		UserInfo    models.Users          `json:"user_info"`
 		CompanyList []models.CompanyUsers `json:"company_list"`

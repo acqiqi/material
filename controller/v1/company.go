@@ -18,7 +18,7 @@ func CompanyCreate(c *gin.Context) {
 	}
 
 	user_info, _ := c.Get("user_info")
-	data.Cuid = int(user_info.(models.Users).Id)
+	data.Cuid = int(user_info.(models.Users).Cuid)
 	cb, err := company_service.Add(&data)
 	if err != nil {
 		e.ApiErr(c, err.Error())
@@ -54,7 +54,7 @@ func CompanyMyInfo(c *gin.Context) {
 	}
 
 	user_info, _ := c.Get("user_info")
-	if info.Cuid != int(user_info.(models.Users).Id) {
+	if info.Cuid != int(user_info.(models.Users).Cuid) {
 		e.ApiErr(c, "非法请求")
 		return
 	}
@@ -70,7 +70,7 @@ func CompanyMyInfo(c *gin.Context) {
 // 获取我的公司
 func CompanyMyList(c *gin.Context) {
 	user_info, _ := c.Get("user_info")
-	list, err := models.CompanyUsersGetMyList(user_info.(models.Users).Id)
+	list, err := models.CompanyUsersGetMyList(user_info.(models.Users).Cuid)
 	if err != nil {
 		e.ApiErr(c, err.Error())
 		return

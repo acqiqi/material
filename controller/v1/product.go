@@ -218,7 +218,7 @@ func ProductInfo(c *gin.Context) {
 //		return
 //	}
 //	user_info, _ := c.Get("user_info")
-//	data.Cuid = int(user_info.(models.Users).Id)
+//	data.Cuid = int(user_info.(models.Users).Cuid)
 //	company, _ := c.Get("company")
 //	data.CompanyId = company.(models.CompanyUsers).Company.Id
 //	//检测项目是否存在
